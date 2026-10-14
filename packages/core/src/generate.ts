@@ -1,3 +1,4 @@
+import { getArchitecture } from "./architectures";
 import { ProjectBuilder } from "./builder";
 import { getModule, MODULES } from "./modules";
 import { formatFile } from "./format";
@@ -52,6 +53,9 @@ export function validateConfig(config: ProjectConfig): string[] {
     errors.push(
       "Project name must be lowercase and contain only letters, digits, '-', '_' or '.' (e.g. my-app).",
     );
+  }
+  if (!getArchitecture(config.architecture)) {
+    errors.push(`Unknown architecture "${config.architecture}".`);
   }
   if (!PACKAGE_MANAGERS.includes(config.packageManager)) {
     errors.push(`Unsupported package manager "${config.packageManager}".`);

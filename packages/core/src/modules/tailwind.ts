@@ -22,7 +22,7 @@ export default config;
     );
 
     project.addFile(
-      "app/globals.css",
+      `${project.paths.app}/globals.css`,
       `@import "tailwindcss";
 
 :root {

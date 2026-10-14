@@ -1,12 +1,12 @@
 /**
  * Generates a project on disk, handy to try modules locally.
  *
- *   npm run generate -- --name my-app --modules tailwind,shadcn,prisma --pm npm --out ../../tmp
+ *   npm run generate -- --name my-app --modules tailwind,shadcn,prisma --pm npm --arch feature --out ../../tmp
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { generateProject, type PackageManager } from "../src";
+import { generateProject, type ArchitectureId, type PackageManager } from "../src";
 
 const { values } = parseArgs({
   options: {
@@ -14,6 +14,7 @@ const { values } = parseArgs({
     description: { type: "string", default: "" },
     modules: { type: "string", default: "" },
     pm: { type: "string", default: "npm" },
+    arch: { type: "string", default: "simple" },
     out: { type: "string", default: "." },
   },
 });
@@ -22,6 +23,7 @@ const project = await generateProject({
   name: values.name,
   description: values.description,
   packageManager: values.pm as PackageManager,
+  architecture: values.arch as ArchitectureId,
   modules: values.modules.split(",").filter(Boolean),
 });
 

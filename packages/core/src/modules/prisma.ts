@@ -8,6 +8,8 @@ export const prisma: StackModule = {
   homepage: "https://www.prisma.io",
   conflicts: ["drizzle"],
   apply(project) {
+    const { paths } = project;
+    const clientFile = `${paths.db}/index.ts`;
     project
       .addDependency("@prisma/client", "@prisma/adapter-pg")
       .addDevDependency("prisma", "dotenv")
@@ -20,7 +22,7 @@ export const prisma: StackModule = {
         value: "postgresql://postgres:postgres@localhost:5432/app",
         comment: "PostgreSQL connection string",
       })
-      .addGitignore("prisma", "/generated/prisma");
+      .addGitignore("prisma", `/${paths.generated}/prisma`);
 
     project.addFile(
       "prisma.config.ts",
@@ -44,7 +46,7 @@ export default defineConfig({
       "prisma/schema.prisma",
       `generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
+  output   = "../${paths.generated}/prisma"
 }
 
 datasource db {
@@ -62,9 +64,9 @@ model User {
     );
 
     project.addFile(
-      "lib/prisma.ts",
+      clientFile,
       `import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@/generated/prisma/client";
+import { PrismaClient } from "${project.importPath(paths.generated)}/prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
@@ -83,9 +85,9 @@ if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
       "Database (Prisma)",
       `1. Start a PostgreSQL database and set \`DATABASE_URL\` in \`.env\`.
 2. Push the schema: \`${project.run("db:push")}\` (or create a migration with \`${project.run("db:migrate")}\`).
-3. Import the client with \`import { prisma } from "@/lib/prisma"\`.
+3. Import the client with \`import { prisma } from "${project.importPath(clientFile)}"\`.
 
-The schema lives in \`prisma/schema.prisma\`; the client is generated into \`generated/prisma\` on install.`,
+The schema lives in \`prisma/schema.prisma\`; the client is generated into \`${paths.generated}/prisma\` on install.`,
     );
   },
 };

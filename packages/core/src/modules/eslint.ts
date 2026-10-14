@@ -9,7 +9,7 @@ export const eslint: StackModule = {
   apply(project) {
     project.addDevDependency("eslint", "eslint-config-next").addScript("lint", "eslint");
 
-    const extraIgnores = project.has("prisma") ? `\n    "generated/**",` : "";
+    const extraIgnores = project.has("prisma") ? `\n    "${project.paths.generated}/**",` : "";
     project.addFile(
       "eslint.config.mjs",
       `import { defineConfig, globalIgnores } from "eslint/config";

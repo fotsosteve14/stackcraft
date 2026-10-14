@@ -1,3 +1,5 @@
+export { ARCHITECTURES, getArchitecture } from "./architectures";
+export type { Architecture, ArchitectureId, ProjectPaths } from "./architectures";
 export { ProjectBuilder } from "./builder";
 export { generateProject, InvalidConfigError, resolveModules, validateConfig } from "./generate";
 export type { ResolvedModules } from "./generate";

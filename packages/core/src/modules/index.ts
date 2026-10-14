@@ -1,4 +1,5 @@
 import type { ModuleCategory, StackModule } from "../types";
+import { animatedIcons } from "./animated-icons";
 import { docker } from "./docker";
 import { drizzle } from "./drizzle";
 import { eslint } from "./eslint";
@@ -19,6 +20,7 @@ import { zustand } from "./zustand";
 export const MODULES: readonly StackModule[] = [
   tailwind,
   shadcn,
+  animatedIcons,
   prisma,
   drizzle,
   nextauth,

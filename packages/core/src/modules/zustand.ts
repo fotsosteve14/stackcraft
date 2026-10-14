@@ -10,7 +10,7 @@ export const zustand: StackModule = {
     project.addDependency("zustand");
 
     project.addFile(
-      "stores/counter-store.ts",
+      `${project.paths.stores}/counter-store.ts`,
       `import { create } from "zustand";
 
 interface CounterState {

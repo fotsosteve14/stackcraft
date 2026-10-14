@@ -1,9 +1,16 @@
-import { PACKAGE_MANAGERS, type PackageManager, type ProjectConfig } from "@stackcraft/core";
+import {
+  getArchitecture,
+  PACKAGE_MANAGERS,
+  type ArchitectureId,
+  type PackageManager,
+  type ProjectConfig,
+} from "@stackcraft/core";
 
 export const DEFAULT_CONFIG: ProjectConfig = {
   name: "my-app",
   description: "",
   packageManager: "npm",
+  architecture: "simple",
   modules: [],
 };
 
@@ -15,18 +22,23 @@ function asPackageManager(value: unknown): PackageManager {
   return PACKAGE_MANAGERS.includes(value as PackageManager) ? (value as PackageManager) : DEFAULT_CONFIG.packageManager;
 }
 
-/** Reads a config from URL params: ?name=my-app&description=…&pm=pnpm&modules=tailwind,prisma */
+function asArchitecture(value: unknown): ArchitectureId {
+  return typeof value === "string" && getArchitecture(value) ? (value as ArchitectureId) : DEFAULT_CONFIG.architecture;
+}
+
+/** Reads a config from URL params: ?name=my-app&description=…&pm=pnpm&arch=feature&modules=tailwind,prisma */
 export function configFromParams(params: ParamsLike): ProjectConfig {
   return {
     name: params.get("name") ?? DEFAULT_CONFIG.name,
     description: params.get("description") ?? DEFAULT_CONFIG.description,
     packageManager: asPackageManager(params.get("pm")),
+    architecture: asArchitecture(params.get("arch")),
     modules: (params.get("modules") ?? "").split(",").filter(Boolean),
   };
 }
 
 export function configToParams(config: ProjectConfig): URLSearchParams {
-  const params = new URLSearchParams({ name: config.name, pm: config.packageManager });
+  const params = new URLSearchParams({ name: config.name, pm: config.packageManager, arch: config.architecture });
   if (config.description) params.set("description", config.description);
   if (config.modules.length > 0) params.set("modules", config.modules.join(","));
   return params;
@@ -39,6 +51,7 @@ export function configFromJson(body: unknown): ProjectConfig {
     name: typeof value.name === "string" ? value.name : DEFAULT_CONFIG.name,
     description: typeof value.description === "string" ? value.description : "",
     packageManager: asPackageManager(value.packageManager),
+    architecture: asArchitecture(value.architecture),
     modules: Array.isArray(value.modules) ? value.modules.filter((m): m is string => typeof m === "string") : [],
   };
 }

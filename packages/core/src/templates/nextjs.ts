@@ -1,9 +1,10 @@
+import { getArchitecture } from "../architectures";
 import type { ProjectBuilder } from "../builder";
 import { MODULES } from "../modules";
 
 /** Static files of a fresh Next.js (App Router, TypeScript) project. */
 export function applyNextjsBase(project: ProjectBuilder): void {
-  const { config } = project;
+  const { config, paths } = project;
 
   project
     .addDependency("next", "react", "react-dom")
@@ -31,7 +32,7 @@ export function applyNextjsBase(project: ProjectBuilder): void {
           jsx: "react-jsx",
           incremental: true,
           plugins: [{ name: "next" }],
-          paths: { "@/*": ["./*"] },
+          paths: { "@/*": [`./${paths.srcDir}*`] },
         },
         include: [
           "next-env.d.ts",
@@ -49,7 +50,7 @@ export function applyNextjsBase(project: ProjectBuilder): void {
   );
 
   project.addFile(
-    "app/layout.tsx",
+    `${paths.app}/layout.tsx`,
     `import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -83,7 +84,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   );
 
   project.addFile(
-    "app/globals.css",
+    `${paths.app}/globals.css`,
     `:root {
   --background: #ffffff;
   --foreground: #171717;
@@ -139,7 +140,7 @@ body {
   );
 
   project.addFile(
-    "app/icon.svg",
+    `${paths.app}/icon.svg`,
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#171717"/><path d="M9 21l7-11 7 11z" fill="#fff"/></svg>`,
   );
 
@@ -179,9 +180,11 @@ body {
 export function finalizeNextjsBase(project: ProjectBuilder, moduleIds: string[]): void {
   const { config } = project;
 
+  getArchitecture(config.architecture)!.applyExample?.(project);
+
   project.addFile("package.json", renderPackageJson(project));
   project.addFile("next.config.ts", renderNextConfig(project));
-  project.addFile("app/page.tsx", renderPage(project));
+  project.addFile(`${project.paths.app}/page.tsx`, renderPage(project));
   project.addFile(".gitignore", project.gitignore.join("\n").trimStart());
   project.addFile("README.md", renderReadme(project, moduleIds));
 
@@ -237,19 +240,34 @@ export default nextConfig;
 }
 
 function renderPage(project: ProjectBuilder): string {
-  const { name, description } = project.config;
+  const { name, description, architecture } = project.config;
   const title = `{${JSON.stringify(name)}}`;
   const subtitle = description ? `{${JSON.stringify(description)}}` : "Your project is ready.";
+  const pagePath = `${project.paths.app}/page.tsx`;
+  const hasExample = !!getArchitecture(architecture)!.applyExample;
+  const imports: string[] = [];
+  if (hasExample) imports.push(`import Link from "next/link";`);
+  if (project.has("shadcn")) {
+    imports.push(`import { Button } from "${project.importPath(`${project.paths.ui}/button.tsx`)}";`);
+  }
+  const header = imports.length > 0 ? `${imports.join("\n")}\n\n` : "";
 
   if (!project.has("tailwind")) {
-    return `export default function Home() {
+    return `${header}export default function Home() {
   return (
     <main className="page">
       <h1>${title}</h1>
       <p>${subtitle}</p>
       <p>
-        Edit <code>app/page.tsx</code> to get started.
-      </p>
+        Edit <code>${pagePath}</code> to get started.
+      </p>${
+        hasExample
+          ? `
+      <p>
+        <Link href="/users">See the example feature</Link>
+      </p>`
+          : ""
+      }
     </main>
   );
 }
@@ -258,7 +276,7 @@ function renderPage(project: ProjectBuilder): string {
 
   const shadcn = project.has("shadcn");
   const muted = shadcn ? "text-muted-foreground" : "text-zinc-600 dark:text-zinc-400";
-  return `${shadcn ? 'import { Button } from "@/components/ui/button";\n\n' : ""}export default function Home() {
+  return `${header}export default function Home() {
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-6 p-8 text-center">
       <h1 className="text-4xl font-bold tracking-tight">${title}</h1>
@@ -273,8 +291,15 @@ function renderPage(project: ProjectBuilder): string {
           : ""
       }
       <p className="text-sm ${muted}">
-        Edit <code className="font-mono">app/page.tsx</code> to get started.
-      </p>
+        Edit <code className="font-mono">${pagePath}</code> to get started.
+      </p>${
+        hasExample
+          ? `
+      <Link href="/users" className="text-sm font-medium underline underline-offset-4">
+        See the example feature
+      </Link>`
+          : ""
+      }
     </main>
   );
 }
@@ -283,6 +308,7 @@ function renderPage(project: ProjectBuilder): string {
 
 function renderReadme(project: ProjectBuilder, moduleIds: string[]): string {
   const { config } = project;
+  const architecture = getArchitecture(config.architecture)!;
   const modules = moduleIds
     .map((id) => MODULES.find((m) => m.id === id))
     .filter((m) => m !== undefined);
@@ -305,6 +331,14 @@ function renderReadme(project: ProjectBuilder, moduleIds: string[]): string {
     "",
     "- [Next.js](https://nextjs.org) (App Router, TypeScript)",
     ...modules.map((m) => `- [${m.name}](${m.homepage}): ${m.description}`),
+    "",
+    "## Project structure",
+    "",
+    `Architecture: **${architecture.name}**. ${architecture.description}`,
+    "",
+    "```",
+    architecture.tree,
+    "```",
     "",
     "## Scripts",
     "",

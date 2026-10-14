@@ -38,7 +38,7 @@ export default defineConfig({
       "__tests__/page.test.tsx",
       `import { render, screen } from "@testing-library/react";
 import { expect, test } from "vitest";
-import Page from "../app/page";
+import Page from "${project.importPath(`${project.paths.app}/page.tsx`)}";
 
 test("renders the project name", () => {
   render(<Page />);

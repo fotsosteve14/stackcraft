@@ -1,3 +1,4 @@
+import { getArchitecture, type ProjectPaths } from "./architectures";
 import type { EnvVar, ProjectConfig } from "./types";
 import { VERSIONS, type KnownPackage } from "./versions";
 
@@ -21,11 +22,24 @@ export class ProjectBuilder {
   /** next.config.ts entries: key → TypeScript expression. */
   readonly nextConfig: Record<string, string> = {};
   readonly readmeSections: ReadmeSection[] = [];
+  /** Where each kind of file goes, according to the chosen architecture. */
+  readonly paths: ProjectPaths;
 
   constructor(
     readonly config: ProjectConfig,
     private readonly moduleIds: ReadonlySet<string>,
-  ) {}
+  ) {
+    const architecture = getArchitecture(config.architecture);
+    if (!architecture) throw new Error(`Unknown architecture "${config.architecture}"`);
+    this.paths = architecture.paths;
+  }
+
+  /** Import specifier for a project file or folder: "src/shared/lib/utils.ts" → "@/shared/lib/utils". */
+  importPath(path: string): string {
+    const { srcDir } = this.paths;
+    const relative = srcDir && path.startsWith(srcDir) ? path.slice(srcDir.length) : path;
+    return `@/${relative.replace(/(\/index)?\.(tsx?|mts)$/, "")}`;
+  }
 
   /** Whether a module is part of the project. */
   has(moduleId: string): boolean {
