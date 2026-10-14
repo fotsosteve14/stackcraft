@@ -8,7 +8,7 @@ export const nextauth: StackModule = {
   homepage: "https://authjs.dev",
   apply(project) {
     project
-      .addDependency("next-auth")
+      .addDependency("next-auth", "server-only")
       .addEnv({
         key: "AUTH_SECRET",
         value: "",
@@ -23,7 +23,8 @@ export const nextauth: StackModule = {
 
     project.addFile(
       project.paths.auth,
-      `import NextAuth from "next-auth";
+      `import "server-only";
+import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({

@@ -39,6 +39,9 @@ export const VERSIONS = {
   // Auth
   "next-auth": "5.0.0-beta.32",
 
+  // Shared
+  "server-only": "^0.0.1",
+
   // Code quality
   eslint: "^10",
   "eslint-config-next": "16.4.0",

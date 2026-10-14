@@ -11,7 +11,7 @@ export const prisma: StackModule = {
     const { paths } = project;
     const clientFile = `${paths.db}/index.ts`;
     project
-      .addDependency("@prisma/client", "@prisma/adapter-pg")
+      .addDependency("@prisma/client", "@prisma/adapter-pg", "server-only")
       .addDevDependency("prisma", "dotenv")
       .addScript("postinstall", "prisma generate")
       .addScript("db:push", "prisma db push")
@@ -65,7 +65,8 @@ model User {
 
     project.addFile(
       clientFile,
-      `import { PrismaPg } from "@prisma/adapter-pg";
+      `import "server-only";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "${project.importPath(paths.generated)}/prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };

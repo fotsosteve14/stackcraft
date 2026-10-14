@@ -2,6 +2,17 @@ import { getArchitecture } from "../architectures";
 import type { ProjectBuilder } from "../builder";
 import { MODULES } from "../modules";
 
+const NEXT_AGENT_RULES = `<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes \u2014 APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in \`node_modules/next/dist/docs/\` (resolved from this file's directory; in monorepos the \`next\` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by \`next dev\` \u2014 verify at \`node_modules/next/dist/server/lib/generate-agent-files.js\`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
+`;
+
 /** Static files of a fresh Next.js (App Router, TypeScript) project. */
 export function applyNextjsBase(project: ProjectBuilder): void {
   const { config, paths } = project;
@@ -11,7 +22,16 @@ export function applyNextjsBase(project: ProjectBuilder): void {
     .addDevDependency("typescript", "@types/node", "@types/react", "@types/react-dom")
     .addScript("dev", "next dev")
     .addScript("build", "next build")
-    .addScript("start", "next start");
+    .addScript("start", "next start")
+    // next typegen creates route types (LayoutProps, PageProps…) that tsc needs.
+    .addScript("typecheck", "next typegen && tsc --noEmit")
+    // Defaults of create-next-app 16.4: the Cache Components model with Partial Prefetching.
+    .setNextConfig("cacheComponents", "true")
+    .setNextConfig("partialPrefetching", "true");
+
+  // Same block that create-next-app writes and `next dev` keeps up to date. Keep it verbatim:
+  // any difference makes `next dev` rewrite the file.
+  project.addFile("AGENTS.md", NEXT_AGENT_RULES);
 
   project.addFile(
     "tsconfig.json",

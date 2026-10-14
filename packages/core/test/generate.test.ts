@@ -66,6 +66,23 @@ describe("generateProject", () => {
     expect(files["app/page.tsx"]).toContain('className="page"');
   });
 
+  test("follows create-next-app 16.4 defaults", async () => {
+    const { files } = await generateProject(base);
+    expect(files["next.config.ts"]).toContain("cacheComponents: true");
+    expect(files["next.config.ts"]).toContain("partialPrefetching: true");
+    expect(files["AGENTS.md"]).toContain("<!-- BEGIN:nextjs-agent-rules -->");
+    expect(pkg(files).scripts.typecheck).toBe("next typegen && tsc --noEmit");
+  });
+
+  test("server code is guarded with server-only", async () => {
+    for (const db of ["prisma", "drizzle"]) {
+      const { files } = await generateProject({ ...base, modules: [db, "nextauth"] });
+      expect(files["db/index.ts"]).toMatch(/^import "server-only";/);
+      expect(files["auth.ts"]).toMatch(/^import "server-only";/);
+      expect(pkg(files).dependencies["server-only"]).toBeDefined();
+    }
+  });
+
   test("throws on invalid config", async () => {
     await expect(generateProject({ ...base, modules: ["prisma", "drizzle"] })).rejects.toThrow(InvalidConfigError);
   });
