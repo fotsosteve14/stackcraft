@@ -69,4 +69,5 @@ Architectures live in `packages/core/src/architectures.ts`. An architecture defi
 
 - Keep PRs focused (one module or one feature).
 - Run `npm test`, `npm run typecheck` and `npm run lint` before pushing.
+- Describe your change under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md).
 - For larger changes (new framework, GitHub push…), open an issue first to discuss the design.
