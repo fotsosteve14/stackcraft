@@ -8,6 +8,7 @@ export const drizzle: StackModule = {
   homepage: "https://orm.drizzle.team",
   conflicts: ["prisma"],
   apply(project) {
+    const { paths } = project;
     project
       .addDependency("drizzle-orm", "postgres")
       .addDevDependency("drizzle-kit", "dotenv")
@@ -27,7 +28,7 @@ export const drizzle: StackModule = {
 import { defineConfig } from "drizzle-kit";
 
 export default defineConfig({
-  schema: "./db/schema.ts",
+  schema: "./${paths.db}/schema.ts",
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
@@ -38,7 +39,7 @@ export default defineConfig({
     );
 
     project.addFile(
-      "db/schema.ts",
+      `${paths.db}/schema.ts`,
       `import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -54,7 +55,7 @@ export type NewUser = typeof users.$inferInsert;
     );
 
     project.addFile(
-      "db/index.ts",
+      `${paths.db}/index.ts`,
       `import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
@@ -72,7 +73,7 @@ export const db = drizzle(client, { schema });
       "Database (Drizzle)",
       `1. Start a PostgreSQL database and set \`DATABASE_URL\` in \`.env\`.
 2. Push the schema: \`${project.run("db:push")}\` (or \`${project.run("db:generate")}\` + \`${project.run("db:migrate")}\` for migrations).
-3. Query with \`import { db } from "@/db"\`.`,
+3. Query with \`import { db } from "${project.importPath(paths.db)}"\`.`,
     );
   },
 };

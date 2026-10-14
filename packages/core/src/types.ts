@@ -1,3 +1,4 @@
+import type { ArchitectureId } from "./architectures";
 import type { ProjectBuilder } from "./builder";
 
 export type PackageManager = "npm" | "pnpm" | "yarn" | "bun";
@@ -9,6 +10,8 @@ export interface ProjectConfig {
   name: string;
   description: string;
   packageManager: PackageManager;
+  /** Folder organization of the generated code. */
+  architecture: ArchitectureId;
   /** Ids of the selected modules. Required modules are added automatically. */
   modules: string[];
 }

@@ -22,7 +22,7 @@ export const nextauth: StackModule = {
       .addEnv({ key: "AUTH_GITHUB_SECRET", value: "" });
 
     project.addFile(
-      "auth.ts",
+      project.paths.auth,
       `import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
 
@@ -33,8 +33,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     );
 
     project.addFile(
-      "app/api/auth/[...nextauth]/route.ts",
-      `import { handlers } from "@/auth";
+      `${project.paths.app}/api/auth/[...nextauth]/route.ts`,
+      `import { handlers } from "${project.importPath(project.paths.auth)}";
 
 export const { GET, POST } = handlers;
 `,
@@ -44,7 +44,7 @@ export const { GET, POST } = handlers;
       "Authentication (Auth.js)",
       `1. Create a GitHub OAuth app with the callback URL \`http://localhost:3000/api/auth/callback/github\`.
 2. Fill \`AUTH_SECRET\`, \`AUTH_GITHUB_ID\` and \`AUTH_GITHUB_SECRET\` in \`.env\`.
-3. Read the session in a Server Component with \`const session = await auth()\` (from \`@/auth\`).
+3. Read the session in a Server Component with \`const session = await auth()\` (from \`${project.importPath(project.paths.auth)}\`).
 
 More providers: https://authjs.dev/getting-started/authentication/oauth`,
     );

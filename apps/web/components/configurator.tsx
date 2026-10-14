@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ARCHITECTURES,
   CATEGORIES,
   getModule,
   MODULES,
@@ -197,6 +198,29 @@ export function Configurator() {
               value={config.packageManager}
               onChange={(packageManager) => update({ packageManager })}
             />
+          </Field>
+
+          <Field label="Architecture">
+            <div className="grid gap-2 sm:grid-cols-3">
+              {ARCHITECTURES.map((a) => (
+                <button
+                  key={a.id}
+                  type="button"
+                  onClick={() => update({ architecture: a.id })}
+                  aria-pressed={config.architecture === a.id}
+                  className={`rounded-lg border p-3 text-left transition-colors ${
+                    config.architecture === a.id
+                      ? "border-accent bg-accent-soft"
+                      : "border-border bg-surface hover:border-muted"
+                  }`}
+                >
+                  <span className={`block text-sm font-medium ${config.architecture === a.id ? "text-accent" : ""}`}>
+                    {a.name}
+                  </span>
+                  <span className="mt-1 block text-xs text-muted">{a.description}</span>
+                </button>
+              ))}
+            </div>
           </Field>
 
           <Field label="Metadata">

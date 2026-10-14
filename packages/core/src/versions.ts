@@ -21,6 +21,11 @@ export const VERSIONS = {
   "radix-ui": "^1.8.1",
   "tailwind-merge": "^3.7.0",
   "tw-animate-css": "^1.4.0",
+  // Pinned exactly, as required by icons-animated.
+  motion: "13.1.1",
+  "framer-motion": "13.1.1",
+  "motion-dom": "13.1.1",
+  "motion-utils": "13.0.0",
 
   // Database
   prisma: "^7.10.0",

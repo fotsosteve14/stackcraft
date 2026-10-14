@@ -9,6 +9,7 @@ Pick a framework, add the dependencies you need (Tailwind, shadcn/ui, Prisma, Au
 - 🧩 **Modules, not boilerplates**: every dependency is a small module that adds its packages, config files, scripts, env vars and docs.
 - 🔗 **Smart resolution**: requirements are added automatically (shadcn/ui → Tailwind), conflicts are blocked (Prisma ✕ Drizzle).
 - 🤝 **Modules know each other**: Prettier sorts Tailwind classes when Tailwind is there, Docker adds a PostgreSQL `docker-compose.yml` when you pick a database, Zod validates the env vars other modules declare.
+- 🏗️ **Pick your architecture**: Simple (standard Next.js), Feature-based (`src/features/*`) or Clean Architecture (domain / application / infrastructure). Every module adapts its files to it, and an example feature shows the pattern.
 - 👀 **Explore before downloading**: browse every generated file in the browser.
 - 🔗 **Shareable**: the URL holds the whole configuration.
 - ⚙️ **API**: `curl` a project directly.
@@ -17,7 +18,7 @@ Pick a framework, add the dependencies you need (Tailwind, shadcn/ui, Prisma, Au
 
 | Category | Modules |
 | --- | --- |
-| Styling & UI | Tailwind CSS v4, shadcn/ui |
+| Styling & UI | Tailwind CSS v4, shadcn/ui, Animated Icons ([icons-animated](https://icons.lndev.me)) |
 | Database | Prisma 7, Drizzle ORM |
 | Authentication | Auth.js (NextAuth v5) |
 | State & Validation | Zustand, Zod |
@@ -33,7 +34,9 @@ Frameworks: **Next.js** (App Router, TypeScript). Vite, Nuxt and SvelteKit are o
 curl -o my-app.zip "https://<your-instance>/api/generate?name=my-app&pm=pnpm&modules=shadcn,prisma,nextauth"
 ```
 
-`POST /api/generate` accepts the same config as JSON: `{ "name", "description", "packageManager", "modules": [] }`.
+Parameters: `name`, `description`, `pm` (npm, pnpm, yarn, bun), `arch` (simple, feature, clean), `modules`.
+
+`POST /api/generate` accepts the same config as JSON: `{ "name", "description", "packageManager", "architecture", "modules": [] }`.
 
 ## Development
 
@@ -50,7 +53,7 @@ npm run lint
 Generate a project on disk without the UI:
 
 ```bash
-npm run generate -- --name demo --modules shadcn,prisma,vitest --pm npm --out ../
+npm run generate -- --name demo --modules shadcn,prisma,vitest --pm npm --arch feature --out ../
 ```
 
 ## Project structure
@@ -59,13 +62,15 @@ npm run generate -- --name demo --modules shadcn,prisma,vitest --pm npm --out ..
 apps/web            Next.js UI + /api/generate
 packages/core       Generation engine (framework-agnostic TypeScript)
   src/modules/      One file per module, start here to contribute
+  src/architectures.ts  Folder layouts (Simple, Feature-based, Clean) and their examples
   src/templates/    Base project templates (Next.js)
   src/versions.ts   Every dependency version, in one place
 ```
 
 ## Roadmap
 
-- [x] Next.js generator, 11 modules, ZIP download, file explorer, shareable links
+- [x] Next.js generator, 12 modules, ZIP download, file explorer, shareable links
+- [x] Architectures: Simple, Feature-based, Clean Architecture
 - [ ] Push to a new GitHub repository (OAuth)
 - [ ] CLI: `npx create-stackcraft`
 - [ ] More frameworks: Vite + React, Nuxt, SvelteKit

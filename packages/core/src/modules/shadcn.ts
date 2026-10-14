@@ -8,6 +8,8 @@ export const shadcn: StackModule = {
   homepage: "https://ui.shadcn.com",
   requires: ["tailwind"],
   apply(project) {
+    const { paths } = project;
+    const utilsFile = `${paths.lib}/utils.ts`;
     project
       .addDependency("class-variance-authority", "clsx", "lucide-react", "radix-ui", "tailwind-merge")
       .addDevDependency("tw-animate-css");
@@ -22,17 +24,17 @@ export const shadcn: StackModule = {
           tsx: true,
           tailwind: {
             config: "",
-            css: "app/globals.css",
+            css: `${paths.app}/globals.css`,
             baseColor: "neutral",
             cssVariables: true,
             prefix: "",
           },
           aliases: {
-            components: "@/components",
-            utils: "@/lib/utils",
-            ui: "@/components/ui",
-            lib: "@/lib",
-            hooks: "@/hooks",
+            components: project.importPath(paths.components),
+            utils: project.importPath(utilsFile),
+            ui: project.importPath(paths.ui),
+            lib: project.importPath(paths.lib),
+            hooks: project.importPath(paths.hooks),
           },
           iconLibrary: "lucide",
         },
@@ -42,7 +44,7 @@ export const shadcn: StackModule = {
     );
 
     project.addFile(
-      "lib/utils.ts",
+      utilsFile,
       `import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -53,12 +55,12 @@ export function cn(...inputs: ClassValue[]) {
     );
 
     project.addFile(
-      "components/ui/button.tsx",
+      `${paths.ui}/button.tsx`,
       `import * as React from "react";
 import { Slot } from "radix-ui";
 import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/lib/utils";
+import { cn } from "${project.importPath(utilsFile)}";
 
 const buttonVariants = cva(
   "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium outline-none transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
@@ -112,7 +114,7 @@ export { Button, buttonVariants };
     );
 
     project.addFile(
-      "app/globals.css",
+      `${paths.app}/globals.css`,
       `@import "tailwindcss";
 @import "tw-animate-css";
 
@@ -201,7 +203,7 @@ export { Button, buttonVariants };
 
     project.addReadmeSection(
       "UI components",
-      `Components live in \`components/ui\`. Add more with:
+      `Components live in \`${paths.ui}\`. Add more with:
 
 \`\`\`bash
 ${project.exec("shadcn@latest add card dialog")}

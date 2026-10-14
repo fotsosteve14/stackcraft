@@ -12,7 +12,7 @@ export const zod: StackModule = {
     // Runs after the modules that declare environment variables (see registry order).
     const fields = project.env.map((v) => `  ${v.key}: z.string().min(1),`);
     project.addFile(
-      "lib/env.ts",
+      `${project.paths.lib}/env.ts`,
       `import { z } from "zod";
 
 /** Validated server-side environment variables. Add yours to the schema. */
