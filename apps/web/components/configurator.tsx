@@ -14,7 +14,9 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useEffectEvent, useMemo, useState, type ReactNode } from "react";
 import { configFromParams, configToParams } from "@/lib/config";
 import { DependencyPicker } from "./dependency-picker";
+import type { GitHubStatus } from "@/app/api/github/me/route";
 import { Explorer } from "./explorer";
+import { PushDialog } from "./push-dialog";
 
 const FRAMEWORKS = [
   { id: "nextjs", label: "Next.js", available: true },
@@ -76,7 +78,19 @@ export function Configurator() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [explorerOpen, setExplorerOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState<{ kind: "error" | "info"; message: string } | null>(null);
+  const [notice, setNotice] = useState<{ kind: "error" | "info"; message: string } | null>(() =>
+    searchParams.get("github") === "error" ? { kind: "error", message: "GitHub sign-in failed. Try again." } : null,
+  );
+  const [github, setGithub] = useState<GitHubStatus | null>(null);
+  // Back from GitHub sign-in: reopen the push dialog.
+  const [pushOpen, setPushOpen] = useState(() => searchParams.get("github") === "connected");
+
+  useEffect(() => {
+    fetch("/api/github/me")
+      .then((r) => r.json() as Promise<GitHubStatus>)
+      .then(setGithub)
+      .catch(() => setGithub({ configured: false, user: null }));
+  }, []);
 
   const resolved = useMemo(() => resolveModules(config.modules), [config.modules]);
   const errors = useMemo(() => validateConfig(config), [config]);
@@ -126,6 +140,26 @@ export function Configurator() {
     }
   };
 
+  const pushToGitHub = () => {
+    if (errors.length > 0) return;
+    if (!github?.configured) {
+      flash("error", "GitHub push is not configured on this instance (see apps/web/.env.example).");
+    } else if (!github.user) {
+      const back = `${window.location.pathname}${window.location.search}`;
+      // Full navigation on purpose: the API route redirects to GitHub's OAuth page.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.href = `/api/github/login?return=${encodeURIComponent(back)}`;
+    } else {
+      setPushOpen(true);
+    }
+  };
+
+  const signOut = async () => {
+    await fetch("/api/github/logout", { method: "POST" });
+    setGithub((g) => (g ? { ...g, user: null } : g));
+    setPushOpen(false);
+  };
+
   const share = async () => {
     await navigator.clipboard.writeText(window.location.href);
     flash("info", "Link copied to clipboard. Anyone opening it gets this exact configuration.");
@@ -153,6 +187,7 @@ export function Configurator() {
 
   const closePicker = useCallback(() => setPickerOpen(false), []);
   const closeExplorer = useCallback(() => setExplorerOpen(false), []);
+  const closePush = useCallback(() => setPushOpen(false), []);
 
   const requiredBy = (id: string) =>
     resolved.modules
@@ -337,6 +372,15 @@ export function Configurator() {
             </button>
             <button
               type="button"
+              disabled={errors.length > 0 || github === null}
+              onClick={pushToGitHub}
+              title={github && !github.configured ? "Not configured on this instance" : undefined}
+              className="rounded-lg border border-border px-5 py-2.5 font-medium hover:bg-background disabled:opacity-50"
+            >
+              Push to GitHub
+            </button>
+            <button
+              type="button"
               onClick={share}
               className="rounded-lg border border-border px-5 py-2.5 font-medium hover:bg-background"
             >
@@ -348,6 +392,9 @@ export function Configurator() {
 
       {pickerOpen && <DependencyPicker active={resolved.modules} locked={resolved.added} onToggle={toggleModule} onClose={closePicker} />}
       {explorerOpen && <Explorer config={config} onClose={closeExplorer} onDownload={download} />}
+      {pushOpen && github?.user && errors.length === 0 && (
+        <PushDialog config={config} user={github.user} onClose={closePush} onSignOut={signOut} />
+      )}
     </>
   );
 }
