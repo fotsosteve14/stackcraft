@@ -1,8 +1,9 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { connection, NextResponse, type NextRequest } from "next/server";
 import { getOAuthConfig, STATE_COOKIE, unseal, writeSession } from "@/lib/github-session";
 
 /** GitHub redirects here after the user authorizes StackCraft. */
 export async function GET(request: NextRequest) {
+  await connection();
   const config = getOAuthConfig();
   if (!config) return NextResponse.json({ error: "GitHub push is not configured." }, { status: 501 });
 

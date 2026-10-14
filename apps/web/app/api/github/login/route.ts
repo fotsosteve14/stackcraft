@@ -1,9 +1,10 @@
 import { randomBytes } from "node:crypto";
-import { NextResponse, type NextRequest } from "next/server";
+import { connection, NextResponse, type NextRequest } from "next/server";
 import { cookieOptions, getOAuthConfig, safeReturnPath, seal, STATE_COOKIE } from "@/lib/github-session";
 
 /** Starts the GitHub OAuth flow. ?return=/?name=… brings the user back to their configuration. */
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
+  await connection();
   const config = getOAuthConfig();
   if (!config) return NextResponse.json({ error: "GitHub push is not configured." }, { status: 501 });
 

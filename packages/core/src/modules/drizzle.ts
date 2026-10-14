@@ -10,7 +10,7 @@ export const drizzle: StackModule = {
   apply(project) {
     const { paths } = project;
     project
-      .addDependency("drizzle-orm", "postgres")
+      .addDependency("drizzle-orm", "postgres", "server-only")
       .addDevDependency("drizzle-kit", "dotenv")
       .addScript("db:generate", "drizzle-kit generate")
       .addScript("db:migrate", "drizzle-kit migrate")
@@ -56,7 +56,8 @@ export type NewUser = typeof users.$inferInsert;
 
     project.addFile(
       `${paths.db}/index.ts`,
-      `import { drizzle } from "drizzle-orm/postgres-js";
+      `import "server-only";
+import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
 

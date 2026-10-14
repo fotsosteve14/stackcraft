@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Generated projects follow the `create-next-app` 16.4 defaults: Cache Components and Partial Prefetching are enabled, and an `AGENTS.md` points AI coding agents to the bundled Next.js docs.
+- `typecheck` script (`next typegen && tsc --noEmit`) in generated projects.
+- Database clients and the Auth.js config import `server-only`, so they can never end up in a client bundle.
+- The example `users` feature (Feature-based and Clean) shows the `"use cache"` + `cacheLife` pattern.
+
+### Changed
+
+- StackCraft itself runs with Cache Components and ships an `AGENTS.md`.
+
+### Fixed
+
+- GitHub API routes are always rendered per request (`connection()`), so the sign-in status is never frozen at build time.
+
 ## [0.1.0] - 2026-10-14
 
 First public version.

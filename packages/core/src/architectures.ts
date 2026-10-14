@@ -106,13 +106,16 @@ Rule of thumb: a feature may import from shared/ and server/, never from another
 
     project.addFile(
       "src/features/users/queries.ts",
-      `import type { User } from "./types";
+      `import { cacheLife } from "next/cache";
+import type { User } from "./types";
 
 /**
- * Data access for the users feature.
+ * Data access for the users feature, cached with Cache Components.
  * Replace the in-memory list with your database${project.has("prisma") || project.has("drizzle") ? ` (see ${project.importPath(project.paths.db)})` : ""}.
  */
 export async function getUsers(): Promise<User[]> {
+  "use cache";
+  cacheLife("hours");
   return [
     { id: "1", name: "Ada Lovelace", email: "ada@example.com" },
     { id: "2", name: "Alan Turing", email: "alan@example.com" },
@@ -253,10 +256,13 @@ export const useCases = {
 
     project.addFile(
       "src/app/users/page.tsx",
-      `import { UserList } from "@/components/user-list";
+      `import { cacheLife } from "next/cache";
+import { UserList } from "@/components/user-list";
 import { useCases } from "@/infrastructure/container";
 
 export default async function UsersPage() {
+  "use cache";
+  cacheLife("hours");
   const users = await useCases.listUsers();
   return ${usersPageBody(tw)};
 }

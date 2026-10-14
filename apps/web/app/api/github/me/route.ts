@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { connection, NextResponse, type NextRequest } from "next/server";
 import { getOAuthConfig, readSession } from "@/lib/github-session";
 
 export interface GitHubStatus {
@@ -7,7 +7,9 @@ export interface GitHubStatus {
 }
 
 /** Whether GitHub push is available and who is signed in. Never exposes the token. */
-export function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {
+  // Always per request: the answer depends on runtime env vars and the session cookie.
+  await connection();
   const config = getOAuthConfig();
   const session = config ? readSession(request, config) : null;
   const status: GitHubStatus = {
