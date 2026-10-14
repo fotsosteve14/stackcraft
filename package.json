@@ -1,0 +1,22 @@
+{
+  "name": "stackcraft",
+  "private": true,
+  "description": "Craft your stack: generate ready-to-code projects with the dependencies you pick.",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @stackcraft/web",
+    "build": "npm run build -w @stackcraft/web",
+    "start": "npm run start -w @stackcraft/web",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "generate": "npm run generate -w @stackcraft/core --"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}

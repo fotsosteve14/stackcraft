@@ -1,0 +1,25 @@
+{
+  "name": "@stackcraft/core",
+  "version": "0.1.0",
+  "description": "StackCraft generation engine: turns a project config and a list of modules into project files.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "generate": "tsx scripts/generate.ts"
+  },
+  "dependencies": {
+    "jszip": "^3.10.2",
+    "prettier": "^3.9.10"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.4"
+  }
+}
