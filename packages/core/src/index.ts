@@ -4,6 +4,8 @@ export { ProjectBuilder } from "./builder";
 export { generateProject, InvalidConfigError, resolveModules, validateConfig } from "./generate";
 export type { ResolvedModules } from "./generate";
 export { CATEGORIES, getModule, MODULES } from "./modules";
+export { GitHubError, pushToGitHub } from "./github";
+export type { GitHubPushOptions, GitHubPushResult, GitHubRepoOptions } from "./github";
 export { generateZip } from "./zip";
 export { PACKAGE_MANAGERS } from "./types";
 export type {
