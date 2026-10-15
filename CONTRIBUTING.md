@@ -61,6 +61,11 @@ npm test
 
 Generated files are formatted with Prettier automatically, so don't worry about indentation in templates.
 
+## Updating dependency versions
+
+- **StackCraft's own dependencies** are updated by Dependabot (`.github/dependabot.yml`), which waits a few days after each release before opening a pull request.
+- **Versions written into generated projects** live in `packages/core/src/versions.ts` and are bumped by hand. After a bump, generate real projects with the affected modules and check that they install, build, lint and pass their tests (see "Adding a module" step 4).
+
 ## Adding an architecture
 
 Architectures live in `packages/core/src/architectures.ts`. An architecture defines `paths` (where each kind of file goes), a `tree` for the generated README, and optionally `applyExample` to generate a small feature showing the pattern. Test it with every module: `npm run generate -- --arch <id> --modules ...`.
