@@ -19,7 +19,8 @@ Pick a framework, add the dependencies you need (Tailwind, shadcn/ui, Prisma, Au
 
 | Category | Modules |
 | --- | --- |
-| Styling & UI | Tailwind CSS v4, shadcn/ui, Animated Icons ([icons-animated](https://icons.lndev.me)) |
+| Styling & UI | Tailwind CSS v4, shadcn/ui, Animated Icons ([icons-animated](https://icons.lndev.me)), Motion |
+| 3D | Three.js (React Three Fiber + Drei) |
 | Database | Prisma 7, Drizzle ORM |
 | Authentication | Auth.js (NextAuth v5), Better Auth |
 | State & Validation | Zustand, Zod |

@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Feature-based and Clean projects include `error.tsx` (with the Next.js 16 `retry` prop), `not-found.tsx` and a `loading.tsx` for `/users`.
 - **Better Auth** module: email and password plus GitHub OAuth with Prisma or Drizzle (auth tables added to the schema), stateless GitHub sign-in without a database. Conflicts with Auth.js.
 - Dependabot keeps StackCraft's dependencies up to date (weekly, with a cooldown on fresh releases; ESLint 10 ignored until `eslint-config-next` supports it).
+- **Motion** module with an accessible `FadeIn` example (respects reduced motion). When Animated Icons is also selected, its exact Motion version is kept.
+- **Three.js** module (React Three Fiber + Drei) in a new 3D category: a client-only scene loaded with `next/dynamic` and a `/scene` example page.
 - **React Compiler** module (`reactCompiler: true`, same setup as `create-next-app`), in a new Performance category.
 
 ### Changed

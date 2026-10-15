@@ -4,11 +4,13 @@ import { betterAuth } from "./better-auth";
 import { docker } from "./docker";
 import { drizzle } from "./drizzle";
 import { eslint } from "./eslint";
+import { motion } from "./motion";
 import { nextauth } from "./nextauth";
 import { prettier } from "./prettier";
 import { prisma } from "./prisma";
 import { reactCompiler } from "./react-compiler";
 import { shadcn } from "./shadcn";
+import { three } from "./three";
 import { tailwind } from "./tailwind";
 import { vitest } from "./vitest";
 import { zod } from "./zod";
@@ -23,6 +25,8 @@ export const MODULES: readonly StackModule[] = [
   tailwind,
   shadcn,
   animatedIcons,
+  motion,
+  three,
   prisma,
   drizzle,
   nextauth,
@@ -42,6 +46,7 @@ export const CATEGORIES: readonly { id: ModuleCategory; label: string }[] = [
   { id: "auth", label: "Authentication" },
   { id: "state", label: "State & Validation" },
   { id: "performance", label: "Performance" },
+  { id: "3d", label: "3D" },
   { id: "quality", label: "Code Quality" },
   { id: "testing", label: "Testing" },
   { id: "deployment", label: "Deployment" },

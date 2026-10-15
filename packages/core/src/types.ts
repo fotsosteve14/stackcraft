@@ -22,6 +22,7 @@ export type ModuleCategory =
   | "auth"
   | "state"
   | "performance"
+  | "3d"
   | "quality"
   | "testing"
   | "deployment";

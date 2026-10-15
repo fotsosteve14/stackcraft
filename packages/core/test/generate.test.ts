@@ -141,6 +141,23 @@ test("animated icons register their shadcn registry and pin motion", async () =>
   expect(files["README.md"]).toContain("shadcn@latest add @icons-animated/tabler-heart");
 });
 
+describe("motion and three", () => {
+  test("motion uses the standalone version, or the icons' exact pin when both are selected", async () => {
+    const alone = await generateProject({ ...base, modules: ["motion"] });
+    expect(pkg(alone.files).dependencies.motion).toBe("^13.5.1");
+    expect(alone.files["components/fade-in.tsx"]).toContain('reducedMotion="user"');
+    const withIcons = await generateProject({ ...base, modules: ["motion", "animated-icons"] });
+    expect(pkg(withIcons.files).dependencies.motion).toBe("13.1.1");
+  });
+
+  test("three adds React Three Fiber, a client-only scene and a /scene page", async () => {
+    const { files } = await generateProject({ ...base, architecture: "feature", modules: ["three", "tailwind"] });
+    expect(pkg(files).dependencies["@react-three/fiber"]).toBeDefined();
+    expect(files["src/shared/components/scene/index.tsx"]).toContain("ssr: false");
+    expect(files["src/app/scene/page.tsx"]).toContain('from "@/shared/components/scene"');
+  });
+});
+
 describe("better auth", () => {
   test("conflicts with Auth.js", () => {
     expect(resolveModules(["better-auth", "nextauth"]).errors).toHaveLength(1);
