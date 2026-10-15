@@ -1,0 +1,36 @@
+# Keeps StackCraft's own dependencies up to date.
+# Versions written into generated projects live in packages/core/src/versions.ts
+# and are updated by hand (see CONTRIBUTING.md).
+version: 2
+updates:
+  - package-ecosystem: npm
+    # npm workspaces: the root manifest and lockfile cover apps/* and packages/*.
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    # Wait before proposing fresh releases: quick follow-up patches are common.
+    cooldown:
+      default-days: 5
+      semver-major-days: 14
+    open-pull-requests-limit: 10
+    labels: [dependencies]
+    groups:
+      # These must move together.
+      nextjs:
+        patterns: [next, eslint-config-next, "@next/*", react, react-dom, "@types/react", "@types/react-dom"]
+      tailwind:
+        patterns: [tailwindcss, "@tailwindcss/*"]
+      dev-tools:
+        dependency-type: development
+        update-types: [minor, patch]
+    ignore:
+      # eslint-config-next 16.4 plugins (react, import, jsx-a11y) do not support ESLint 10 yet.
+      - dependency-name: eslint
+        versions: [">=10"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels: [dependencies]
