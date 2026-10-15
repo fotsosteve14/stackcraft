@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-15
+
+Next.js 16.4 best practices and 4 new modules (16 in total).
+
 ### Added
 
 - Generated projects follow the `create-next-app` 16.4 defaults: Cache Components and Partial Prefetching are enabled, and an `AGENTS.md` points AI coding agents to the bundled Next.js docs.
@@ -52,5 +56,6 @@ First public version.
 - Generated files are formatted with Prettier.
 - CI workflow, contributing guide and issue templates.
 
-[Unreleased]: https://github.com/fotsosteve14/stackcraft/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/fotsosteve14/stackcraft/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/fotsosteve14/stackcraft/releases/tag/v0.1.0

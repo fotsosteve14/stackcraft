@@ -80,9 +80,10 @@ packages/core       Generation engine (framework-agnostic TypeScript)
 
 ## Roadmap
 
-- [x] Next.js generator, 12 modules, ZIP download, file explorer, shareable links
+- [x] Next.js generator, 16 modules, ZIP download, file explorer, shareable links
 - [x] Architectures: Simple, Feature-based, Clean Architecture
 - [x] Push to a new GitHub repository (OAuth)
+- [x] Next.js 16.4 best practices: Cache Components, `server-only`, error boundaries, `AGENTS.md`
 - [ ] CLI: `npx create-stackcraft`
 - [ ] More frameworks: Vite + React, Nuxt, SvelteKit
 - [ ] More modules: Supabase, tRPC, TanStack Query, Playwright, Storybook, i18n…
