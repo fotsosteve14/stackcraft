@@ -16,7 +16,15 @@ export interface ProjectConfig {
   modules: string[];
 }
 
-export type ModuleCategory = "ui" | "database" | "auth" | "quality" | "testing" | "state" | "deployment";
+export type ModuleCategory =
+  | "ui"
+  | "database"
+  | "auth"
+  | "state"
+  | "performance"
+  | "quality"
+  | "testing"
+  | "deployment";
 
 export interface StackModule {
   id: string;

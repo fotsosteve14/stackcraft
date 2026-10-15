@@ -6,6 +6,7 @@ export const nextauth: StackModule = {
   description: "Authentication with OAuth providers, preconfigured with GitHub.",
   category: "auth",
   homepage: "https://authjs.dev",
+  conflicts: ["better-auth"],
   apply(project) {
     project
       .addDependency("next-auth", "server-only")
