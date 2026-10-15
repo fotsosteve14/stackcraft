@@ -29,7 +29,12 @@ Pick a framework, add the dependencies you need (Tailwind, shadcn/ui, Prisma, Au
 | Testing | Vitest + Testing Library |
 | Deployment | Docker |
 
-Frameworks: **Next.js** (App Router, TypeScript). Vite, Nuxt and SvelteKit are on the roadmap.
+Frameworks:
+
+- **Next.js** (App Router, TypeScript): every module.
+- **Vite + React** (TypeScript, single-page app): every module that runs in the browser. Prisma, Drizzle, Auth.js and Better Auth need a server, so they are Next.js only.
+
+Next on the roadmap: NestJS, TanStack Start and Astro.
 
 ## Use the API
 
@@ -37,9 +42,9 @@ Frameworks: **Next.js** (App Router, TypeScript). Vite, Nuxt and SvelteKit are o
 curl -o my-app.zip "https://<your-instance>/api/generate?name=my-app&pm=pnpm&modules=shadcn,prisma,nextauth"
 ```
 
-Parameters: `name`, `description`, `pm` (npm, pnpm, yarn, bun), `arch` (simple, feature, clean), `modules`.
+Parameters: `name`, `description`, `fw` (nextjs, vite-react), `pm` (npm, pnpm, yarn, bun), `arch` (simple, feature, clean), `modules`.
 
-`POST /api/generate` accepts the same config as JSON: `{ "name", "description", "packageManager", "architecture", "modules": [] }`.
+`POST /api/generate` accepts the same config as JSON: `{ "name", "description", "framework", "packageManager", "architecture", "modules": [] }`.
 
 ## Development
 
@@ -64,7 +69,7 @@ The GitHub token is stored only in an encrypted, `httpOnly` cookie and never rea
 Generate a project on disk without the UI:
 
 ```bash
-npm run generate -- --name demo --modules shadcn,prisma,vitest --pm npm --arch feature --out ../
+npm run generate -- --name demo --framework vite-react --modules shadcn,vitest --pm npm --arch feature --out ../
 ```
 
 ## Project structure
@@ -73,6 +78,7 @@ npm run generate -- --name demo --modules shadcn,prisma,vitest --pm npm --arch f
 apps/web            Next.js UI + /api/generate
 packages/core       Generation engine (framework-agnostic TypeScript)
   src/modules/      One file per module, start here to contribute
+  src/frameworks/   Base templates (Next.js, Vite + React)
   src/architectures.ts  Folder layouts (Simple, Feature-based, Clean) and their examples
   src/templates/    Base project templates (Next.js)
   src/versions.ts   Every dependency version, in one place
@@ -85,7 +91,8 @@ packages/core       Generation engine (framework-agnostic TypeScript)
 - [x] Push to a new GitHub repository (OAuth)
 - [x] Next.js 16.4 best practices: Cache Components, `server-only`, error boundaries, `AGENTS.md`
 - [ ] CLI: `npx create-stackcraft`
-- [ ] More frameworks: Vite + React, Nuxt, SvelteKit
+- [x] Vite + React
+- [ ] More frameworks: NestJS, TanStack Start, Astro, then Nuxt and SvelteKit
 - [ ] More modules: Supabase, tRPC, TanStack Query, Playwright, Storybook, i18n…
 - [ ] GitLab export
 

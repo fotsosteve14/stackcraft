@@ -5,10 +5,13 @@ export type PackageManager = "npm" | "pnpm" | "yarn" | "bun";
 
 export const PACKAGE_MANAGERS: readonly PackageManager[] = ["npm", "pnpm", "yarn", "bun"];
 
+export type FrameworkId = "nextjs" | "vite-react";
+
 export interface ProjectConfig {
   /** npm package name, also used as the root folder name. */
   name: string;
   description: string;
+  framework: FrameworkId;
   packageManager: PackageManager;
   /** Folder organization of the generated code. */
   architecture: ArchitectureId;
@@ -37,6 +40,8 @@ export interface StackModule {
   requires?: string[];
   /** Modules that cannot be selected together with this one. */
   conflicts?: string[];
+  /** Frameworks the module supports. Omitted means every framework. */
+  frameworks?: FrameworkId[];
   apply(project: ProjectBuilder): void;
 }
 

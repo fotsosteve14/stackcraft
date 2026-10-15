@@ -13,9 +13,7 @@ export const motion: StackModule = {
 
     project.addFile(
       `${paths.components}/fade-in.tsx`,
-      `"use client";
-
-import { MotionConfig, motion } from "motion/react";
+      `${project.useClient}import { MotionConfig, motion } from "motion/react";
 import type { ReactNode } from "react";
 
 /** Fades and slides its children in on mount. Respects the user's reduced motion setting. */

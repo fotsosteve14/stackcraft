@@ -8,6 +8,7 @@ export const betterAuth: StackModule = {
   category: "auth",
   homepage: "https://www.better-auth.com",
   conflicts: ["nextauth"],
+  frameworks: ["nextjs"],
   apply(project) {
     const { paths } = project;
     const database = project.has("prisma") ? "prisma" : project.has("drizzle") ? "drizzle" : null;

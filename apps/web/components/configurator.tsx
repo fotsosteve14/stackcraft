@@ -3,11 +3,15 @@
 import {
   ARCHITECTURES,
   CATEGORIES,
+  FRAMEWORKS,
+  getFramework,
   getModule,
   MODULES,
   PACKAGE_MANAGERS,
   resolveModules,
+  supportsFramework,
   validateConfig,
+  type FrameworkId,
   type ProjectConfig,
 } from "@stackcraft/core";
 import { useSearchParams } from "next/navigation";
@@ -18,11 +22,12 @@ import type { GitHubStatus } from "@/app/api/github/me/route";
 import { Explorer } from "./explorer";
 import { PushDialog } from "./push-dialog";
 
-const FRAMEWORKS = [
-  { id: "nextjs", label: "Next.js", available: true },
-  { id: "vite-react", label: "Vite + React", available: false },
-  { id: "nuxt", label: "Nuxt", available: false },
-  { id: "sveltekit", label: "SvelteKit", available: false },
+const FRAMEWORK_OPTIONS = [
+  ...FRAMEWORKS.map((f) => ({ id: f.id as string, label: f.name, available: true })),
+  // Roadmap, by demand (npm downloads).
+  { id: "nestjs", label: "NestJS", available: false },
+  { id: "tanstack-start", label: "TanStack Start", available: false },
+  { id: "astro", label: "Astro", available: false },
 ];
 
 const REPO_URL = "https://github.com/fotsosteve14/stackcraft";
@@ -92,7 +97,10 @@ export function Configurator() {
       .catch(() => setGithub({ configured: false, user: null }));
   }, []);
 
-  const resolved = useMemo(() => resolveModules(config.modules), [config.modules]);
+  const resolved = useMemo(
+    () => resolveModules(config.modules, config.framework),
+    [config.modules, config.framework],
+  );
   const errors = useMemo(() => validateConfig(config), [config]);
   const canGenerate = errors.length === 0 && !busy;
 
@@ -102,6 +110,20 @@ export function Configurator() {
   }, [config]);
 
   const update = (patch: Partial<ProjectConfig>) => setConfig((c) => ({ ...c, ...patch }));
+
+  // Switching framework drops the modules it does not support, and says so.
+  const changeFramework = (framework: FrameworkId) => {
+    if (framework === config.framework) return;
+    const dropped = config.modules.filter((id) => {
+      const mod = getModule(id);
+      return mod && !supportsFramework(mod, framework);
+    });
+    setConfig((c) => ({ ...c, framework, modules: c.modules.filter((id) => !dropped.includes(id)) }));
+    if (dropped.length > 0) {
+      const names = dropped.map((id) => getModule(id)!.name).join(", ");
+      flash("info", `Removed ${names}: not available for ${getFramework(framework)!.name}.`);
+    }
+  };
 
   const toggleModule = (id: string) =>
     setConfig((c) => ({
@@ -224,7 +246,12 @@ export function Configurator() {
           <h2 className="text-xs font-semibold tracking-wider text-muted uppercase">Project</h2>
 
           <Field label="Framework">
-            <Segmented options={FRAMEWORKS} value="nextjs" onChange={() => {}} />
+            <Segmented
+              options={FRAMEWORK_OPTIONS}
+              value={config.framework as string}
+              onChange={(id) => changeFramework(id as FrameworkId)}
+            />
+            <p className="text-xs text-muted">{getFramework(config.framework)?.description}</p>
           </Field>
 
           <Field label="Package manager">
@@ -390,7 +417,7 @@ export function Configurator() {
         </div>
       </footer>
 
-      {pickerOpen && <DependencyPicker active={resolved.modules} locked={resolved.added} onToggle={toggleModule} onClose={closePicker} />}
+      {pickerOpen && <DependencyPicker active={resolved.modules} locked={resolved.added} framework={config.framework} onToggle={toggleModule} onClose={closePicker} />}
       {explorerOpen && <Explorer config={config} onClose={closeExplorer} onDownload={download} />}
       {pushOpen && github?.user && errors.length === 0 && (
         <PushDialog config={config} user={github.user} onClose={closePush} onSignOut={signOut} />

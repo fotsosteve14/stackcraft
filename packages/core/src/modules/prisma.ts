@@ -7,6 +7,7 @@ export const prisma: StackModule = {
   category: "database",
   homepage: "https://www.prisma.io",
   conflicts: ["drizzle"],
+  frameworks: ["nextjs"],
   apply(project) {
     const { paths } = project;
     const clientFile = `${paths.db}/index.ts`;

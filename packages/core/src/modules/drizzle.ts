@@ -7,6 +7,7 @@ export const drizzle: StackModule = {
   category: "database",
   homepage: "https://orm.drizzle.team",
   conflicts: ["prisma"],
+  frameworks: ["nextjs"],
   apply(project) {
     const { paths } = project;
     project

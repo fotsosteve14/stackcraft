@@ -15,9 +15,7 @@ export const three: StackModule = {
 
     project.addFile(
       `${sceneDir}/scene-canvas.tsx`,
-      `"use client";
-
-import { OrbitControls } from "@react-three/drei";
+      `${project.useClient}import { OrbitControls } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import type { Mesh } from "three";
@@ -51,9 +49,13 @@ export default function SceneCanvas() {
     );
 
     const box = tw ? 'className="h-80 w-full max-w-xl"' : 'style={{ height: 320, width: "100%", maxWidth: 560 }}';
-    project.addFile(
-      `${sceneDir}/index.tsx`,
-      `"use client";
+    const docs = "built with [React Three Fiber](https://r3f.docs.pmnd.rs) and [Drei](https://drei.docs.pmnd.rs)";
+    const canvasDoc = `- \`${sceneDir}/scene-canvas.tsx\`: the scene itself (meshes, lights, controls).`;
+
+    if (project.config.framework === "nextjs") {
+      project.addFile(
+        `${sceneDir}/index.tsx`,
+        `"use client";
 
 import dynamic from "next/dynamic";
 
@@ -72,14 +74,14 @@ export function Scene() {
   );
 }
 `,
-    );
+      );
 
-    const main = tw
-      ? 'className="flex flex-1 flex-col items-center justify-center gap-6 p-8"'
-      : 'className="page"';
-    project.addFile(
-      `${paths.app}/scene/page.tsx`,
-      `import { Scene } from "${project.importPath(sceneDir)}";
+      const main = tw
+        ? 'className="flex flex-1 flex-col items-center justify-center gap-6 p-8"'
+        : 'className="page"';
+      project.addFile(
+        `${paths.app}/scene/page.tsx`,
+        `import { Scene } from "${project.importPath(sceneDir)}";
 
 export default function ScenePage() {
   return (
@@ -91,14 +93,46 @@ export default function ScenePage() {
   );
 }
 `,
+      );
+
+      project.addReadmeSection(
+        "3D (Three.js)",
+        `Open [http://localhost:3000/scene](http://localhost:3000/scene) for the example scene, ${docs}.
+
+${canvasDoc}
+- \`${sceneDir}/index.tsx\`: loads it on the client only with \`next/dynamic\` and \`ssr: false\`, since WebGL needs a browser.`,
+      );
+      return;
+    }
+
+    project.addFile(
+      `${sceneDir}/index.tsx`,
+      `import { lazy, Suspense } from "react";
+
+// Three.js is large: load the canvas only when the scene renders, in its own chunk.
+const SceneCanvas = lazy(() => import("./scene-canvas"));
+
+export function Scene() {
+  return (
+    <div ${box}>
+      <Suspense fallback={null}>
+        <SceneCanvas />
+      </Suspense>
+    </div>
+  );
+}
+`,
     );
+    project.addHomeSection(`import { Scene } from "${project.importPath(sceneDir)}";`, "<Scene />");
+    // Three.js gets its own lazy-loaded chunk (~900 kB), above Vite's 500 kB warning threshold.
+    project.setViteConfig("build", "{\n    chunkSizeWarningLimit: 1000,\n  }");
 
     project.addReadmeSection(
       "3D (Three.js)",
-      `Open [http://localhost:3000/scene](http://localhost:3000/scene) for the example scene, built with [React Three Fiber](https://r3f.docs.pmnd.rs) and [Drei](https://drei.docs.pmnd.rs).
+      `The home page renders an example scene, ${docs}.
 
-- \`${sceneDir}/scene-canvas.tsx\`: the scene itself (meshes, lights, controls).
-- \`${sceneDir}/index.tsx\`: loads it on the client only with \`next/dynamic\` and \`ssr: false\`, since WebGL needs a browser.`,
+${canvasDoc}
+- \`${sceneDir}/index.tsx\`: loads it lazily with \`React.lazy\`, so Three.js stays out of the main bundle.`,
     );
   },
 };

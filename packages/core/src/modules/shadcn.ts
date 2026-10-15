@@ -1,4 +1,5 @@
 import type { StackModule } from "../types";
+import { tailwindFontTheme } from "./tailwind";
 
 export const shadcn: StackModule = {
   id: "shadcn",
@@ -20,11 +21,11 @@ export const shadcn: StackModule = {
         {
           $schema: "https://ui.shadcn.com/schema.json",
           style: "new-york",
-          rsc: true,
+          rsc: project.config.framework === "nextjs",
           tsx: true,
           tailwind: {
             config: "",
-            css: `${paths.app}/globals.css`,
+            css: paths.css,
             baseColor: "neutral",
             cssVariables: true,
             prefix: "",
@@ -114,7 +115,7 @@ export { Button, buttonVariants };
     );
 
     project.addFile(
-      `${paths.app}/globals.css`,
+      paths.css,
       `@import "tailwindcss";
 @import "tw-animate-css";
 
@@ -123,9 +124,7 @@ export { Button, buttonVariants };
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-card: var(--card);
+${tailwindFontTheme(project)}  --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);

@@ -7,6 +7,7 @@ export const nextauth: StackModule = {
   category: "auth",
   homepage: "https://authjs.dev",
   conflicts: ["better-auth"],
+  frameworks: ["nextjs"],
   apply(project) {
     project
       .addDependency("next-auth", "server-only")

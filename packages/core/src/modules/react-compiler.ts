@@ -7,8 +7,17 @@ export const reactCompiler: StackModule = {
   category: "performance",
   homepage: "https://react.dev/learn/react-compiler",
   apply(project) {
-    // Same setup as create-next-app's "React Compiler" option.
-    project.addDevDependency("babel-plugin-react-compiler").setNextConfig("reactCompiler", "true");
+    project.addDevDependency("babel-plugin-react-compiler");
+    if (project.config.framework === "nextjs") {
+      // Same setup as create-next-app's "React Compiler" option.
+      project.setNextConfig("reactCompiler", "true");
+    } else {
+      // Setup documented by @vitejs/plugin-react (Babel; its Rust compiler is still experimental).
+      project
+        .addDevDependency("@rolldown/plugin-babel", "@babel/core")
+        .addVitePlugin('import babel from "@rolldown/plugin-babel";', "babel({ presets: [reactCompilerPreset()] })");
+      project.vite.imports.push('import { reactCompilerPreset } from "@vitejs/plugin-react";');
+    }
 
     project.addReadmeSection(
       "React Compiler",

@@ -12,9 +12,14 @@ export const VERSIONS = {
   "@types/react": "^19",
   "@types/react-dom": "^19",
 
+  // Vite + React base (create-vite 9.2)
+  vite: "^8.3.0",
+  "@vitejs/plugin-react": "^6.1.2",
+
   // Styling & UI
   tailwindcss: "^4",
   "@tailwindcss/postcss": "^4",
+  "@tailwindcss/vite": "^4",
   "class-variance-authority": "^0.7.1",
   clsx: "^2.1.1",
   "lucide-react": "^1.57.0",
@@ -48,17 +53,25 @@ export const VERSIONS = {
 
   // Performance
   "babel-plugin-react-compiler": "1.0.0",
+  // React Compiler with Vite, through Babel (the Rust compiler is still experimental).
+  "@rolldown/plugin-babel": "^0.2.4",
+  "@babel/core": "^8.0.7",
 
   // Code quality
   // eslint-config-next 16.4 plugins declare eslint <=9 peers; create-next-app uses ^9 too.
   eslint: "^9",
   "eslint-config-next": "16.4.0",
+  // ESLint for Vite projects
+  "@eslint/js": "^9",
+  "typescript-eslint": "^8.71.2",
+  "eslint-plugin-react-hooks": "^7.1.1",
+  "eslint-plugin-react-refresh": "^0.5.7",
+  globals: "^17.13.0",
   prettier: "^3.9.10",
   "prettier-plugin-tailwindcss": "^0.8.1",
 
   // Testing
   vitest: "^5.0.4",
-  "@vitejs/plugin-react": "^6.1.2",
   jsdom: "^30.1.2",
   "@testing-library/react": "^16.3.3",
   "@testing-library/dom": "^10.4.2",

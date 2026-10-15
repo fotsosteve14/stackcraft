@@ -13,6 +13,7 @@ import {
 const base: ProjectConfig = {
   name: "my-app",
   description: "A test app",
+  framework: "nextjs",
   packageManager: "npm",
   architecture: "simple",
   modules: [],
@@ -139,6 +140,60 @@ test("animated icons register their shadcn registry and pin motion", async () =>
   expect(JSON.parse(files["components.json"]!).registries["@icons-animated"]).toBe("https://icons.lndev.me/r/{name}.json");
   expect(pkg(files).dependencies.motion).toBe("13.1.1");
   expect(files["README.md"]).toContain("shadcn@latest add @icons-animated/tabler-heart");
+});
+
+describe("vite + react", () => {
+  const vite: ProjectConfig = { ...base, framework: "vite-react" };
+
+  test("server-side modules are not available", () => {
+    expect(validateConfig({ ...vite, modules: ["prisma", "better-auth"] })).toEqual([
+      '"Prisma" is not available for Vite + React.',
+      '"Better Auth" is not available for Vite + React.',
+    ]);
+  });
+
+  test("generates a Vite project with the @ alias", async () => {
+    const { files } = await generateProject(vite);
+    const json = pkg(files);
+    expect(json.type).toBe("module");
+    expect(json.scripts.build).toBe("tsc -b && vite build");
+    expect(json.devDependencies.typescript).toBe("~6.0.2");
+    expect(files["index.html"]).toContain("<title>my-app</title>");
+    expect(files["vite.config.ts"]).toContain('"@": fileURLToPath(new URL("./src", import.meta.url))');
+    expect(files["src/main.tsx"]).toContain('import App from "@/App"');
+    expect(files["src/App.tsx"]).toContain('className="page"');
+    expect(files["next.config.ts"]).toBeUndefined();
+  });
+
+  test("modules switch to their Vite setup", async () => {
+    const { files } = await generateProject({
+      ...vite,
+      modules: ["shadcn", "react-compiler", "zod", "docker", "prettier", "eslint"],
+    });
+    expect(files["vite.config.ts"]).toContain('import react, { reactCompilerPreset } from "@vitejs/plugin-react"');
+    expect(files["vite.config.ts"]).toContain("tailwindcss()");
+    expect(files["postcss.config.mjs"]).toBeUndefined();
+    expect(JSON.parse(files["components.json"]!).rsc).toBe(false);
+    expect(JSON.parse(files["components.json"]!).tailwind.css).toBe("src/index.css");
+    expect(files["src/index.css"]).not.toContain("--font-geist-sans");
+    expect(files["src/lib/env.ts"]).toContain("import.meta.env");
+    expect(files["Dockerfile"]).toContain("FROM nginx");
+    expect(files["nginx.conf"]).toContain("try_files $uri $uri/ /index.html");
+    expect(files[".prettierignore"]).toContain("dist");
+    expect(files["eslint.config.js"]).toContain("reactRefresh.configs.vite");
+    expect(files["eslint.config.js"]).toContain('files: ["src/components/ui/**"]');
+  });
+
+  test("examples and the 3D scene render on the home page", async () => {
+    const { files } = await generateProject({ ...vite, architecture: "clean", modules: ["three", "vitest"] });
+    expect(files["src/components/users-section.tsx"]).toContain("use(usersPromise)");
+    expect(files["src/app/App.tsx"]).toContain("<UsersSection />");
+    expect(files["src/app/App.tsx"]).toContain("<Scene />");
+    expect(files["src/components/scene/index.tsx"]).toContain("lazy(() => import(");
+    expect(files["src/components/scene/scene-canvas.tsx"]).not.toContain('"use client"');
+    expect(files["src/__tests__/app.test.tsx"]).toContain('vi.mock("@/components/scene"');
+    expect(files["src/app/error.tsx"]).toBeUndefined();
+  });
 });
 
 describe("motion and three", () => {

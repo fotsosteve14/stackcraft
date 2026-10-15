@@ -9,6 +9,26 @@ export const zod: StackModule = {
   apply(project) {
     project.addDependency("zod");
 
+    if (project.config.framework !== "nextjs") {
+      project.addFile(
+        `${project.paths.lib}/env.ts`,
+        `import { z } from "zod";
+
+/**
+ * Validated environment variables. Vite only exposes variables prefixed with VITE_ to the
+ * browser, and everything here ends up in the bundle: never put secrets in it.
+ */
+const envSchema = z.object({
+  MODE: z.string(),
+  // VITE_API_URL: z.url(),
+});
+
+export const env = envSchema.parse(import.meta.env);
+`,
+      );
+      return;
+    }
+
     // Runs after the modules that declare environment variables (see registry order).
     const fields = project.env.map((v) => `  ${v.key}: z.string().min(1),`);
     project.addFile(

@@ -1,9 +1,9 @@
 import { getArchitecture } from "./architectures";
 import { ProjectBuilder } from "./builder";
-import { getModule, MODULES } from "./modules";
 import { formatFile } from "./format";
-import { applyNextjsBase, finalizeNextjsBase } from "./templates/nextjs";
-import { PACKAGE_MANAGERS, type GeneratedProject, type ProjectConfig } from "./types";
+import { getFramework } from "./frameworks";
+import { getModule, MODULES } from "./modules";
+import { PACKAGE_MANAGERS, type FrameworkId, type GeneratedProject, type ProjectConfig, type StackModule } from "./types";
 
 export interface ResolvedModules {
   /** Ordered module ids, including requirements that were added automatically. */
@@ -13,8 +13,16 @@ export interface ResolvedModules {
   errors: string[];
 }
 
-/** Expands requirements, checks conflicts and returns modules in application order. */
-export function resolveModules(ids: readonly string[]): ResolvedModules {
+/** Whether a module can be used with a framework. */
+export function supportsFramework(mod: StackModule, framework: FrameworkId): boolean {
+  return !mod.frameworks || mod.frameworks.includes(framework);
+}
+
+/**
+ * Expands requirements, checks conflicts (and framework support when `framework` is given)
+ * and returns modules in application order.
+ */
+export function resolveModules(ids: readonly string[], framework?: FrameworkId): ResolvedModules {
   const errors: string[] = [];
   const selected = new Set<string>();
   const added: string[] = [];
@@ -41,6 +49,14 @@ export function resolveModules(ids: readonly string[]): ResolvedModules {
     }
   }
 
+  const frameworkName = framework && getFramework(framework)?.name;
+  if (frameworkName) {
+    for (const id of selected) {
+      const mod = getModule(id)!;
+      if (!supportsFramework(mod, framework!)) errors.push(`"${mod.name}" is not available for ${frameworkName}.`);
+    }
+  }
+
   const modules = MODULES.filter((m) => selected.has(m.id)).map((m) => m.id);
   return { modules, added, errors };
 }
@@ -54,13 +70,16 @@ export function validateConfig(config: ProjectConfig): string[] {
       "Project name must be lowercase and contain only letters, digits, '-', '_' or '.' (e.g. my-app).",
     );
   }
+  if (!getFramework(config.framework)) {
+    errors.push(`Unknown framework "${config.framework}".`);
+  }
   if (!getArchitecture(config.architecture)) {
     errors.push(`Unknown architecture "${config.architecture}".`);
   }
   if (!PACKAGE_MANAGERS.includes(config.packageManager)) {
     errors.push(`Unsupported package manager "${config.packageManager}".`);
   }
-  errors.push(...resolveModules(config.modules).errors);
+  errors.push(...resolveModules(config.modules, config.framework).errors);
   return errors;
 }
 
@@ -76,12 +95,13 @@ export async function generateProject(config: ProjectConfig): Promise<GeneratedP
   const errors = validateConfig(config);
   if (errors.length > 0) throw new InvalidConfigError(errors);
 
-  const { modules } = resolveModules(config.modules);
+  const framework = getFramework(config.framework)!;
+  const { modules } = resolveModules(config.modules, config.framework);
   const project = new ProjectBuilder(config, new Set(modules));
 
-  applyNextjsBase(project);
+  framework.applyBase(project);
   for (const id of modules) getModule(id)!.apply(project);
-  finalizeNextjsBase(project, modules);
+  framework.finalize(project, modules);
 
   const entries = [...project.files.entries()].sort(([a], [b]) => a.localeCompare(b));
   const formatted = await Promise.all(

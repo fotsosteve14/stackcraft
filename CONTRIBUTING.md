@@ -33,6 +33,8 @@ npm test
    };
    ```
 
+   If the module needs a server (database, auth…), add `frameworks: ["nextjs"]`. Otherwise it should work with every framework: branch on `project.config.framework` where the setup differs (for example `project.addVitePlugin(...)` with Vite, `project.setNextConfig(...)` with Next.js), and use `project.useClient` instead of writing `"use client"` yourself.
+
    Never hardcode folders like `app/` or `lib/`: use `project.paths` (`app`, `components`, `ui`, `lib`, `hooks`, `stores`, `db`, `auth`, `generated`) and `project.importPath(file)` for imports, so the module works with every architecture.
 
 2. **Pin versions** in `packages/core/src/versions.ts` (`addDependency` only accepts packages listed there).
@@ -65,6 +67,10 @@ Generated files are formatted with Prettier automatically, so don't worry about 
 
 - **StackCraft's own dependencies** are updated by Dependabot (`.github/dependabot.yml`), which waits a few days after each release before opening a pull request.
 - **Versions written into generated projects** live in `packages/core/src/versions.ts` and are bumped by hand. After a bump, generate real projects with the affected modules and check that they install, build, lint and pass their tests (see "Adding a module" step 4).
+
+## Adding a framework
+
+Frameworks live in `packages/core/src/frameworks/`. A framework defines its base files (`applyBase`), the files that depend on the selected modules (`finalize`), and the folders of each architecture (`paths` in `architectures.ts`). Then go through every module: mark it as unsupported with `frameworks`, or add the framework-specific setup. Verify with real projects for every architecture before opening the pull request.
 
 ## Adding an architecture
 

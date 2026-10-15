@@ -7,19 +7,17 @@ export const vitest: StackModule = {
   category: "testing",
   homepage: "https://vitest.dev",
   apply(project) {
+    const { config, paths } = project;
     project
-      .addDevDependency(
-        "vitest",
-        "@vitejs/plugin-react",
-        "jsdom",
-        "@testing-library/react",
-        "@testing-library/dom",
-      )
+      .addDevDependency("vitest", "jsdom", "@testing-library/react", "@testing-library/dom")
       .addScript("test", "vitest");
+    const heading = `screen.getByRole("heading", { level: 1, name: ${JSON.stringify(config.name)} })`;
 
-    project.addFile(
-      "vitest.config.mts",
-      `import react from "@vitejs/plugin-react";
+    if (config.framework === "nextjs") {
+      project.addDevDependency("@vitejs/plugin-react");
+      project.addFile(
+        "vitest.config.mts",
+        `import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -32,19 +30,39 @@ export default defineConfig({
   },
 });
 `,
-    );
+      );
 
-    project.addFile(
-      "__tests__/page.test.tsx",
-      `import { render, screen } from "@testing-library/react";
+      project.addFile(
+        "__tests__/page.test.tsx",
+        `import { render, screen } from "@testing-library/react";
 import { expect, test } from "vitest";
-import Page from "${project.importPath(`${project.paths.app}/page.tsx`)}";
+import Page from "${project.importPath(`${paths.app}/page.tsx`)}";
 
 test("renders the project name", () => {
   render(<Page />);
-  expect(
-    screen.getByRole("heading", { level: 1, name: ${JSON.stringify(project.config.name)} }),
-  ).toBeDefined();
+  expect(${heading}).toBeDefined();
+});
+`,
+      );
+      return;
+    }
+
+    // Vite projects reuse vite.config.ts: same plugins and "@" alias in tests.
+    project.setViteConfig("test", `{\n    environment: "jsdom",\n  }`);
+
+    // WebGL is not available in jsdom: replace the 3D scene in tests.
+    const sceneMock = project.has("three")
+      ? `\nvi.mock("${project.importPath(`${paths.components}/scene`)}", () => ({ Scene: () => null }));\n`
+      : "";
+    project.addFile(
+      "src/__tests__/app.test.tsx",
+      `import { render, screen } from "@testing-library/react";
+import { expect, test${sceneMock ? ", vi" : ""} } from "vitest";
+import App from "${project.importPath(`${paths.app}/App.tsx`)}";
+${sceneMock}
+test("renders the project name", () => {
+  render(<App />);
+  expect(${heading}).toBeDefined();
 });
 `,
     );

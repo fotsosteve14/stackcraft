@@ -1,6 +1,14 @@
 "use client";
 
-import { CATEGORIES, getModule, MODULES, type StackModule } from "@stackcraft/core";
+import {
+  CATEGORIES,
+  getFramework,
+  getModule,
+  MODULES,
+  supportsFramework,
+  type FrameworkId,
+  type StackModule,
+} from "@stackcraft/core";
 import { useMemo, useState } from "react";
 import { Modal } from "./modal";
 
@@ -9,6 +17,7 @@ interface DependencyPickerProps {
   active: readonly string[];
   /** Modules added automatically as requirements: shown as selected, not toggleable. */
   locked: readonly string[];
+  framework: FrameworkId;
   onToggle: (id: string) => void;
   onClose: () => void;
 }
@@ -18,8 +27,9 @@ function conflictWith(mod: StackModule, active: readonly string[]): StackModule 
   return id ? getModule(id) : undefined;
 }
 
-export function DependencyPicker({ active, locked, onToggle, onClose }: DependencyPickerProps) {
+export function DependencyPicker({ active, locked, framework, onToggle, onClose }: DependencyPickerProps) {
   const [query, setQuery] = useState("");
+  const frameworkName = getFramework(framework)?.name;
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -50,7 +60,9 @@ export function DependencyPicker({ active, locked, onToggle, onClose }: Dependen
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
             if (e.key !== "Enter") return;
-            const first = matches.find((m) => !active.includes(m.id) && !conflictWith(m, active));
+            const first = matches.find(
+              (m) => !active.includes(m.id) && !conflictWith(m, active) && supportsFramework(m, framework),
+            );
             if (first) {
               onToggle(first.id);
               setQuery("");
@@ -70,11 +82,12 @@ export function DependencyPicker({ active, locked, onToggle, onClose }: Dependen
               const selected = active.includes(mod.id);
               const conflict = selected ? undefined : conflictWith(mod, active);
               const isLocked = locked.includes(mod.id);
+              const unsupported = !supportsFramework(mod, framework);
               return (
                 <button
                   key={mod.id}
                   type="button"
-                  disabled={!!conflict || isLocked}
+                  disabled={!!conflict || isLocked || unsupported}
                   onClick={() => onToggle(mod.id)}
                   className={`flex w-full items-start gap-3 rounded-lg px-3 py-2.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                     selected ? "bg-accent-soft" : "hover:bg-background"
@@ -91,7 +104,9 @@ export function DependencyPicker({ active, locked, onToggle, onClose }: Dependen
                   <span className="min-w-0">
                     <span className="block font-medium">{mod.name}</span>
                     <span className="block text-sm text-muted">
-                      {conflict
+                      {unsupported
+                        ? `Not available for ${frameworkName}`
+                        : conflict
                         ? `Not compatible with ${conflict.name}`
                         : isLocked
                           ? "Required by another dependency"

@@ -16,11 +16,14 @@ export const prettier: StackModule = {
     if (project.has("tailwind")) {
       project.addDevDependency("prettier-plugin-tailwindcss");
       config.plugins = ["prettier-plugin-tailwindcss"];
-      config.tailwindStylesheet = `./${project.paths.app}/globals.css`;
+      config.tailwindStylesheet = `./${project.paths.css}`;
     }
     project.addFile(".prettierrc.json", JSON.stringify(config, null, 2));
 
-    const ignores = ["node_modules", ".next", "out", "build", "coverage"];
+    const ignores =
+      project.config.framework === "nextjs"
+        ? ["node_modules", ".next", "out", "build", "coverage"]
+        : ["node_modules", "dist", "coverage"];
     if (project.has("prisma")) ignores.push(project.paths.generated);
     if (project.has("drizzle")) ignores.push("drizzle");
     project.addFile(".prettierignore", ignores.join("\n"));

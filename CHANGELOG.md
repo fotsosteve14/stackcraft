@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Vite + React** framework, based on `create-vite` 9.2 (Vite 8, TypeScript 6, `@` alias). Simple, Feature-based and Clean architectures; examples render on the home page with React 19 `use()` and `Suspense`.
+- Modules adapt to the framework: Tailwind uses `@tailwindcss/vite`, React Compiler goes through `@rolldown/plugin-babel`, ESLint uses the create-vite rules (React Hooks, React Refresh), Docker serves the SPA with nginx, Zod validates `import.meta.env`, Three.js is lazy-loaded with `React.lazy`.
+- Server-only modules (Prisma, Drizzle, Auth.js, Better Auth) are limited to Next.js. The UI greys them out and removes them when switching framework.
+- `fw` parameter in the API and shareable links.
+
 ## [0.2.0] - 2026-10-15
 
 Next.js 16.4 best practices and 4 new modules (16 in total).

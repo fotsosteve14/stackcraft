@@ -1,4 +1,12 @@
+import type { ProjectBuilder } from "../builder";
 import type { StackModule } from "../types";
+
+/** Next.js loads Geist with next/font; elsewhere Tailwind's default system font stacks apply. */
+export function tailwindFontTheme(project: ProjectBuilder): string {
+  return project.config.framework === "nextjs"
+    ? "  --font-sans: var(--font-geist-sans);\n  --font-mono: var(--font-geist-mono);\n"
+    : "";
+}
 
 export const tailwind: StackModule = {
   id: "tailwind",
@@ -7,11 +15,11 @@ export const tailwind: StackModule = {
   category: "ui",
   homepage: "https://tailwindcss.com",
   apply(project) {
-    project.addDevDependency("tailwindcss", "@tailwindcss/postcss");
-
-    project.addFile(
-      "postcss.config.mjs",
-      `const config = {
+    if (project.config.framework === "nextjs") {
+      project.addDevDependency("tailwindcss", "@tailwindcss/postcss");
+      project.addFile(
+        "postcss.config.mjs",
+        `const config = {
   plugins: {
     "@tailwindcss/postcss": {},
   },
@@ -19,10 +27,16 @@ export const tailwind: StackModule = {
 
 export default config;
 `,
-    );
+      );
+    } else {
+      // The official Vite plugin is faster than going through PostCSS.
+      project
+        .addDevDependency("tailwindcss", "@tailwindcss/vite")
+        .addVitePlugin('import tailwindcss from "@tailwindcss/vite";', "tailwindcss()");
+    }
 
     project.addFile(
-      `${project.paths.app}/globals.css`,
+      project.paths.css,
       `@import "tailwindcss";
 
 :root {
@@ -33,9 +47,7 @@ export default config;
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+${tailwindFontTheme(project)}}
 
 @media (prefers-color-scheme: dark) {
   :root {

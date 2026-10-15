@@ -21,6 +21,10 @@ export class ProjectBuilder {
   readonly gitignore: string[] = [];
   /** next.config.ts entries: key → TypeScript expression. */
   readonly nextConfig: Record<string, string> = {};
+  /** vite.config.ts: import lines, plugin calls and extra top-level entries (key → expression). */
+  readonly vite = { imports: [] as string[], plugins: [] as string[], config: {} as Record<string, string> };
+  /** Vite only: components rendered on the home page (SPAs have no file-based routes). */
+  readonly homeSections: { importLine: string; element: string }[] = [];
   readonly readmeSections: ReadmeSection[] = [];
   /** Where each kind of file goes, according to the chosen architecture. */
   readonly paths: ProjectPaths;
@@ -31,7 +35,40 @@ export class ProjectBuilder {
   ) {
     const architecture = getArchitecture(config.architecture);
     if (!architecture) throw new Error(`Unknown architecture "${config.architecture}"`);
-    this.paths = architecture.paths;
+    this.paths = architecture.paths[config.framework];
+  }
+
+  /** '"use client";' + blank line for Next.js Client Components, nothing for client-only frameworks. */
+  get useClient(): string {
+    return this.config.framework === "nextjs" ? '"use client";\n\n' : "";
+  }
+
+  /** Font stacks: Geist via next/font with Next.js, system fonts elsewhere. */
+  get fonts(): { sans: string; mono: string } {
+    return this.config.framework === "nextjs"
+      ? { sans: "var(--font-geist-sans), Arial, Helvetica, sans-serif", mono: "var(--font-geist-mono), monospace" }
+      : { sans: "ui-sans-serif, system-ui, sans-serif", mono: "ui-monospace, SFMono-Regular, Menlo, monospace" };
+  }
+
+  /** Writes the example feature of the chosen architecture, if it has one. */
+  applyArchitectureExample(): void {
+    getArchitecture(this.config.architecture)!.applyExample?.(this);
+  }
+
+  addVitePlugin(importLine: string, call: string): this {
+    if (!this.vite.imports.includes(importLine)) this.vite.imports.push(importLine);
+    this.vite.plugins.push(call);
+    return this;
+  }
+
+  setViteConfig(key: string, expression: string): this {
+    this.vite.config[key] = expression;
+    return this;
+  }
+
+  addHomeSection(importLine: string, element: string): this {
+    this.homeSections.push({ importLine, element });
+    return this;
   }
 
   /** Import specifier for a project file or folder: "src/shared/lib/utils.ts" → "@/shared/lib/utils". */
