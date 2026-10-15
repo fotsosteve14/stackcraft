@@ -127,7 +127,7 @@ describe("generateProject", () => {
   });
 
   test("every module generates without errors alongside the others", async () => {
-    const all = MODULES.map((m) => m.id).filter((id) => id !== "drizzle");
+    const all = MODULES.map((m) => m.id).filter((id) => id !== "drizzle" && id !== "better-auth");
     const { modules } = await generateProject({ ...base, modules: all });
     expect(modules).toHaveLength(all.length);
   });
@@ -141,8 +141,41 @@ test("animated icons register their shadcn registry and pin motion", async () =>
   expect(files["README.md"]).toContain("shadcn@latest add @icons-animated/tabler-heart");
 });
 
+describe("better auth", () => {
+  test("conflicts with Auth.js", () => {
+    expect(resolveModules(["better-auth", "nextauth"]).errors).toHaveLength(1);
+  });
+
+  test("is stateless and GitHub-only without a database", async () => {
+    const { files } = await generateProject({ ...base, modules: ["better-auth"] });
+    expect(files["auth.ts"]).toContain("No database selected");
+    expect(files["auth.ts"]).not.toContain("emailAndPassword");
+    expect(files["app/api/auth/[...all]/route.ts"]).toContain("toNextJsHandler(auth)");
+    expect(files["lib/auth-client.ts"]).toContain("createAuthClient");
+  });
+
+  test("uses the Prisma adapter and replaces the User model", async () => {
+    const { files } = await generateProject({ ...base, modules: ["better-auth", "prisma"] });
+    expect(files["auth.ts"]).toContain('prismaAdapter(prisma, { provider: "postgresql" })');
+    expect(files["prisma/schema.prisma"]).toContain('@@map("verification")');
+    expect(files["prisma/schema.prisma"].match(/model User {/g)).toHaveLength(1);
+  });
+
+  test("uses the Drizzle adapter with the auth tables", async () => {
+    const { files } = await generateProject({ ...base, architecture: "clean", modules: ["better-auth", "drizzle"] });
+    expect(files["src/infrastructure/auth.ts"]).toContain('drizzleAdapter(db, { provider: "pg", schema })');
+    expect(files["src/infrastructure/database/schema.ts"]).toContain("export const session = pgTable(");
+  });
+});
+
+test("react compiler enables reactCompiler in next.config", async () => {
+  const { files } = await generateProject({ ...base, modules: ["react-compiler"] });
+  expect(files["next.config.ts"]).toContain("reactCompiler: true");
+  expect(pkg(files).devDependencies["babel-plugin-react-compiler"]).toBe("1.0.0");
+});
+
 describe("architectures", () => {
-  const all = MODULES.map((m) => m.id).filter((id) => id !== "drizzle");
+  const all = MODULES.map((m) => m.id).filter((id) => id !== "drizzle" && id !== "better-auth");
 
   test("rejects unknown architectures", () => {
     expect(validateConfig({ ...base, architecture: "mvc" as never })).toEqual(['Unknown architecture "mvc".']);
@@ -170,6 +203,9 @@ describe("architectures", () => {
     expect(files["src/features/users/queries.ts"]).toBeDefined();
     expect(files["src/features/users/schema.ts"]).toContain("z.email()");
     expect(files["src/app/users/page.tsx"]).toContain('from "@/features/users/queries"');
+    expect(files["src/app/error.tsx"]).toContain("retry: () => void");
+    expect(files["src/app/not-found.tsx"]).toBeDefined();
+    expect(files["src/app/users/loading.tsx"]).toBeDefined();
     expect(files[".prettierrc.json"]).toContain("./src/app/globals.css");
     expect(files["README.md"]).toContain("Feature-based");
     expect(Object.keys(files).some((f) => f.startsWith("app/") || f.startsWith("lib/"))).toBe(false);

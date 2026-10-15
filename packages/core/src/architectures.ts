@@ -93,6 +93,7 @@ Rule of thumb: a feature may import from shared/ and server/, never from another
   applyExample(project) {
     const tw = project.has("tailwind");
     const muted = project.has("shadcn") ? "text-muted-foreground" : "text-zinc-600 dark:text-zinc-400";
+    addRouteBoundaries(project, tw, muted);
 
     project.addFile(
       "src/features/users/types.ts",
@@ -183,6 +184,7 @@ Dependencies point inward: app → application → domain, infrastructure → do
   applyExample(project) {
     const tw = project.has("tailwind");
     const muted = project.has("shadcn") ? "text-muted-foreground" : "text-zinc-600 dark:text-zinc-400";
+    addRouteBoundaries(project, tw, muted);
 
     project.addFile(
       "src/domain/entities/user.ts",
@@ -270,6 +272,81 @@ export default async function UsersPage() {
     );
   },
 };
+
+/** error.tsx, not-found.tsx and a loading state: the App Router conventions for resilient routes. */
+function addRouteBoundaries(project: ProjectBuilder, tw: boolean, muted: string): void {
+  const { app, ui } = project.paths;
+  const shadcn = project.has("shadcn");
+  const main = tw
+    ? ' className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center"'
+    : ' className="page"';
+  const title = tw ? ' className="text-2xl font-bold"' : "";
+  const text = tw ? ` className="${muted}"` : "";
+  const button = shadcn ? "Button" : "button";
+  const buttonImport = shadcn ? `import { Button } from "${project.importPath(`${ui}/button.tsx`)}";\n` : "";
+  const buttonClass = !shadcn && tw ? ' className="rounded-md border px-4 py-2 text-sm font-medium"' : "";
+
+  project.addFile(
+    `${app}/error.tsx`,
+    `"use client"; // Error boundaries must be Client Components
+
+import { useEffect } from "react";
+${buttonImport}
+export default function ErrorPage({
+  error,
+  retry,
+}: {
+  error: Error & { digest?: string };
+  retry: () => void;
+}) {
+  useEffect(() => {
+    // Report the error to your monitoring service here.
+    console.error(error);
+  }, [error]);
+
+  return (
+    <main${main}>
+      <h1${title}>Something went wrong</h1>
+      <p${text}>{error.digest ? "Error reference: " + error.digest : "An unexpected error occurred."}</p>
+      <${button} type="button"${buttonClass} onClick={() => retry()}>
+        Try again
+      </${button}>
+    </main>
+  );
+}
+`,
+  );
+
+  project.addFile(
+    `${app}/not-found.tsx`,
+    `import Link from "next/link";
+
+export default function NotFound() {
+  return (
+    <main${main}>
+      <h1${title}>Page not found</h1>
+      <p${text}>The page you are looking for does not exist.</p>
+      <Link href="/"${tw ? ' className="text-sm font-medium underline underline-offset-4"' : ""}>
+        Back to home
+      </Link>
+    </main>
+  );
+}
+`,
+  );
+
+  project.addFile(
+    `${app}/users/loading.tsx`,
+    `export default function Loading() {
+  return (
+    <main${main}>
+      <p${text}>Loading users…</p>
+    </main>
+  );
+}
+`,
+  );
+}
 
 function userListComponent(tw: boolean, muted: string, typesImport: string): string {
   return `import type { User } from "${typesImport}";

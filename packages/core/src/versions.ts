@@ -38,12 +38,17 @@ export const VERSIONS = {
 
   // Auth
   "next-auth": "5.0.0-beta.32",
+  "better-auth": "^1.7.8",
 
   // Shared
   "server-only": "^0.0.1",
 
+  // Performance
+  "babel-plugin-react-compiler": "1.0.0",
+
   // Code quality
-  eslint: "^10",
+  // eslint-config-next 16.4 plugins declare eslint <=9 peers; create-next-app uses ^9 too.
+  eslint: "^9",
   "eslint-config-next": "16.4.0",
   prettier: "^3.9.10",
   "prettier-plugin-tailwindcss": "^0.8.1",

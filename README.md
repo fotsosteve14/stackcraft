@@ -21,8 +21,9 @@ Pick a framework, add the dependencies you need (Tailwind, shadcn/ui, Prisma, Au
 | --- | --- |
 | Styling & UI | Tailwind CSS v4, shadcn/ui, Animated Icons ([icons-animated](https://icons.lndev.me)) |
 | Database | Prisma 7, Drizzle ORM |
-| Authentication | Auth.js (NextAuth v5) |
+| Authentication | Auth.js (NextAuth v5), Better Auth |
 | State & Validation | Zustand, Zod |
+| Performance | React Compiler |
 | Code Quality | ESLint, Prettier |
 | Testing | Vitest + Testing Library |
 | Deployment | Docker |
@@ -83,7 +84,7 @@ packages/core       Generation engine (framework-agnostic TypeScript)
 - [x] Push to a new GitHub repository (OAuth)
 - [ ] CLI: `npx create-stackcraft`
 - [ ] More frameworks: Vite + React, Nuxt, SvelteKit
-- [ ] More modules: Better Auth, Supabase, tRPC, TanStack Query, Playwright, Storybook, i18n…
+- [ ] More modules: Supabase, tRPC, TanStack Query, Playwright, Storybook, i18n…
 - [ ] GitLab export
 
 ## Contributing

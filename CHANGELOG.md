@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `typecheck` script (`next typegen && tsc --noEmit`) in generated projects.
 - Database clients and the Auth.js config import `server-only`, so they can never end up in a client bundle.
 - The example `users` feature (Feature-based and Clean) shows the `"use cache"` + `cacheLife` pattern.
+- Feature-based and Clean projects include `error.tsx` (with the Next.js 16 `retry` prop), `not-found.tsx` and a `loading.tsx` for `/users`.
+- **Better Auth** module: email and password plus GitHub OAuth with Prisma or Drizzle (auth tables added to the schema), stateless GitHub sign-in without a database. Conflicts with Auth.js.
+- **React Compiler** module (`reactCompiler: true`, same setup as `create-next-app`), in a new Performance category.
 
 ### Changed
 
@@ -21,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - GitHub API routes are always rendered per request (`connection()`), so the sign-in status is never frozen at build time.
+- ESLint is pinned to `^9` (like `create-next-app`): the plugins used by `eslint-config-next` 16.4 do not support ESLint 10 yet, which caused peer dependency warnings on install.
 
 ## [0.1.0] - 2026-10-14
 

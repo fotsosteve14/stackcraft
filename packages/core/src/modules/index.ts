@@ -1,11 +1,13 @@
 import type { ModuleCategory, StackModule } from "../types";
 import { animatedIcons } from "./animated-icons";
+import { betterAuth } from "./better-auth";
 import { docker } from "./docker";
 import { drizzle } from "./drizzle";
 import { eslint } from "./eslint";
 import { nextauth } from "./nextauth";
 import { prettier } from "./prettier";
 import { prisma } from "./prisma";
+import { reactCompiler } from "./react-compiler";
 import { shadcn } from "./shadcn";
 import { tailwind } from "./tailwind";
 import { vitest } from "./vitest";
@@ -24,8 +26,10 @@ export const MODULES: readonly StackModule[] = [
   prisma,
   drizzle,
   nextauth,
+  betterAuth,
   zustand,
   zod,
+  reactCompiler,
   eslint,
   prettier,
   vitest,
@@ -37,6 +41,7 @@ export const CATEGORIES: readonly { id: ModuleCategory; label: string }[] = [
   { id: "database", label: "Database" },
   { id: "auth", label: "Authentication" },
   { id: "state", label: "State & Validation" },
+  { id: "performance", label: "Performance" },
   { id: "quality", label: "Code Quality" },
   { id: "testing", label: "Testing" },
   { id: "deployment", label: "Deployment" },
