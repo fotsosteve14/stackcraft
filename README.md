@@ -105,6 +105,13 @@ packages/core       Generation engine (framework-agnostic TypeScript)
 
 Contributions are very welcome! Adding a module is usually a single file. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Credits
+
+- [bref-ui](https://github.com/feuersteiner/bref-ui) by [feuersteiner](https://github.com/feuersteiner): the Svelte 5 components of the bref-ui module, whose default palette is also the Bref theme preset.
+- [Svelte AI tools](https://github.com/sveltejs/ai-tools) by the Svelte team: the instructions, plugin and MCP setup of the Svelte AI tools module, as in `npx sv add ai-tools`.
+- [icons-animated](https://icons.lndev.me): the Animated Icons module.
+- [Spring Initializr](https://start.spring.io), which inspired the web UI.
+
 ## License
 
 [MIT](LICENSE)
