@@ -4,6 +4,12 @@
 
 Pick a framework, add the dependencies you need (Tailwind, shadcn/ui, Prisma, Auth.js, Vitest, Docker…), and download a ready-to-code project where everything is already wired together.
 
+```bash
+npm create stackcraft@latest
+```
+
+The CLI asks for your framework, dependencies and colors, installs everything and can publish the project to GitHub. The same generator runs in the browser, with a file explorer and shareable links.
+
 ## Features
 
 - 🧩 **Modules, not boilerplates**: every dependency is a small module that adds its packages, config files, scripts, env vars and docs.
@@ -38,6 +44,15 @@ Frameworks:
 - **SvelteKit** (Svelte 5, TypeScript): Tailwind CSS, bref-ui, Zod, ESLint, Prettier, Vitest, Docker and Svelte AI tools. bref-ui and Svelte AI tools are SvelteKit only.
 
 Next on the roadmap: NestJS, TanStack Start and Astro.
+
+## Use the CLI
+
+```bash
+npm create stackcraft@latest          # or: npx create-stackcraft, pnpm create stackcraft…
+npx create-stackcraft my-app --framework sveltekit --modules tailwind,vitest --theme neutral --github private -y
+```
+
+Every question has an option (`--framework`, `--arch`, `--modules`, `--theme`, `--pm`, `--github`, `--no-install`, `-y`). Publishing to GitHub uses the [GitHub CLI](https://cli.github.com) (`gh auth login` once). See [packages/create-stackcraft](packages/create-stackcraft/README.md).
 
 ## Use the API
 
@@ -80,6 +95,7 @@ npm run generate -- --name demo --framework vite-react --modules shadcn,vitest -
 ```
 apps/web            Next.js UI + /api/generate
 packages/core       Generation engine (framework-agnostic TypeScript)
+packages/create-stackcraft  The CLI, published to npm (bundles the engine)
   src/modules/      One file per module, start here to contribute
   src/frameworks/   Base templates (Next.js, Vite + React, SvelteKit)
   src/architectures.ts  Folder layouts (Simple, Feature-based, Clean) and their examples
@@ -93,7 +109,7 @@ packages/core       Generation engine (framework-agnostic TypeScript)
 - [x] Architectures: Simple, Feature-based, Clean Architecture
 - [x] Push to a new GitHub repository (OAuth)
 - [x] Next.js 16.4 best practices: Cache Components, `server-only`, error boundaries, `AGENTS.md`
-- [ ] CLI: `npx create-stackcraft`
+- [x] CLI: `npm create stackcraft`
 - [x] Vite + React
 - [x] SvelteKit, with bref-ui
 - [x] Custom themes: light and dark colors, mode switch, design system import

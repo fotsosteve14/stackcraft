@@ -64,13 +64,16 @@ export function resolveModules(ids: readonly string[], framework?: FrameworkId):
 
 const NAME_PATTERN = /^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$/;
 
+/** Error message when the name is not a valid npm package and folder name, undefined otherwise. */
+export function validateProjectName(name: string): string | undefined {
+  if (NAME_PATTERN.test(name) && name.length <= 214) return undefined;
+  return "Project name must be lowercase and contain only letters, digits, '-', '_' or '.' (e.g. my-app).";
+}
+
 export function validateConfig(config: ProjectConfig): string[] {
   const errors: string[] = [];
-  if (!NAME_PATTERN.test(config.name) || config.name.length > 214) {
-    errors.push(
-      "Project name must be lowercase and contain only letters, digits, '-', '_' or '.' (e.g. my-app).",
-    );
-  }
+  const nameError = validateProjectName(config.name);
+  if (nameError) errors.push(nameError);
   if (!getFramework(config.framework)) {
     errors.push(`Unknown framework "${config.framework}".`);
   }

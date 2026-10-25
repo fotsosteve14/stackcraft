@@ -82,3 +82,13 @@ Architectures live in `packages/core/src/architectures.ts`. An architecture defi
 - Run `npm test`, `npm run typecheck` and `npm run lint` before pushing.
 - Describe your change under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md).
 - For larger changes (new framework, GitHub push…), open an issue first to discuss the design.
+
+## Releasing
+
+`main` is protected: every change, including a release, goes through a pull request.
+
+1. In a pull request, set the same `version` in `packages/core`, `packages/create-stackcraft` and `apps/web`, run `npm install` to update the lockfile, and move the `[Unreleased]` notes of the CHANGELOG under the new version.
+2. Once merged, tag the merge commit and push the tag: `git tag -a v1.2.3 -m "StackCraft v1.2.3" && git push origin v1.2.3`.
+3. The Publish workflow (`.github/workflows/publish.yml`) checks that the tag matches the version, runs the tests and publishes `create-stackcraft` to npm with trusted publishing.
+
+Try the CLI locally before releasing: `npm run build:cli`, then `node packages/create-stackcraft/dist/index.js my-app` from another folder.
