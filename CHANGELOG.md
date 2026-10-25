@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-25
+
+The `create-stackcraft` CLI.
+
+### Added
+
+- **CLI**: `npm create stackcraft@latest` (or `npx create-stackcraft`) asks for the name, framework, architecture, dependencies (only those available for the framework, with requirements added), colors and package manager, writes the project, installs the dependencies and creates a git repository with a first commit.
+- The CLI can publish the project to a new public or private GitHub repository with the GitHub CLI (`gh`), without handling any token.
+- Every question has an option (`--framework`, `--arch`, `--modules`, `--theme`, `--pm`, `--github`, `--no-install`, `-y`) for scripts and CI.
+- `create-stackcraft` is published to npm from GitHub Actions when a version tag is pushed, with npm trusted publishing and provenance.
+
 ## [0.3.0] - 2026-10-25
 
 Vite + React and SvelteKit frameworks, custom themes with dark mode, 2 new modules (18 in total) and a Next.js security fix.
@@ -80,7 +91,8 @@ First public version.
 - Generated files are formatted with Prettier.
 - CI workflow, contributing guide and issue templates.
 
-[Unreleased]: https://github.com/fotsosteve14/stackcraft/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/fotsosteve14/stackcraft/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/fotsosteve14/stackcraft/releases/tag/v0.1.0
