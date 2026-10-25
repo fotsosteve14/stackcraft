@@ -1,8 +1,8 @@
 name: Publish
 
-# Publishes @stackcraft/create (the CLI) to npm when a version tag (v1.2.3) is pushed.
+# Publishes @beyond.corporation/create-stackcraft (the CLI) to npm when a version tag (v1.2.3) is pushed.
 # Authentication uses npm trusted publishing (OIDC): no npm token is stored in the repository.
-# The trusted publisher is configured on npmjs.com, in the @stackcraft/create package settings.
+# The trusted publisher is configured on npmjs.com, in the @beyond.corporation/create-stackcraft package settings.
 on:
   push:
     tags: ["v*"]
@@ -27,17 +27,17 @@ jobs:
         run: |
           version=$(node -p "require('./packages/create-stackcraft/package.json').version")
           if [ "v$version" != "$GITHUB_REF_NAME" ]; then
-            echo "Tag $GITHUB_REF_NAME does not match @stackcraft/create $version" >&2
+            echo "Tag $GITHUB_REF_NAME does not match @beyond.corporation/create-stackcraft $version" >&2
             exit 1
           fi
       - run: npm test
       - run: npm run typecheck
-      - run: npm run build -w @stackcraft/create
+      - run: npm run build -w @beyond.corporation/create-stackcraft
       - name: Publish (skipped when this version is already on npm, e.g. the first manual publish)
         run: |
           version=$(node -p "require('./packages/create-stackcraft/package.json').version")
-          if npm view "@stackcraft/create@$version" version >/dev/null 2>&1; then
-            echo "@stackcraft/create $version is already published."
+          if npm view "@beyond.corporation/create-stackcraft@$version" version >/dev/null 2>&1; then
+            echo "@beyond.corporation/create-stackcraft $version is already published."
           else
-            npm publish -w @stackcraft/create --access public
+            npm publish -w @beyond.corporation/create-stackcraft --access public
           fi

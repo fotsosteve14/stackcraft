@@ -9,14 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.0] - 2026-10-25
 
-The StackCraft CLI, published as `@stackcraft/create`.
+The StackCraft CLI, published as `@beyond.corporation/create-stackcraft`.
 
 ### Added
 
-- **CLI**: `npm create @stackcraft@latest` (or `npx @stackcraft/create@latest`) asks for the name, framework, architecture, dependencies (only those available for the framework, with requirements added), colors and package manager, writes the project, installs the dependencies and creates a git repository with a first commit.
+- **CLI**: `npm create @beyond.corporation/stackcraft@latest` (or `npx @beyond.corporation/create-stackcraft@latest`) asks for the name, framework, architecture, dependencies (only those available for the framework, with requirements added), colors and package manager, writes the project, installs the dependencies and creates a git repository with a first commit.
 - The CLI can publish the project to a new public or private GitHub repository with the GitHub CLI (`gh`), without handling any token.
 - Every question has an option (`--framework`, `--arch`, `--modules`, `--theme`, `--pm`, `--github`, `--no-install`, `-y`) for scripts and CI.
-- `@stackcraft/create` is published to npm from GitHub Actions when a version tag is pushed, with npm trusted publishing and provenance.
+- `@beyond.corporation/create-stackcraft` is published to npm from GitHub Actions when a version tag is pushed, with npm trusted publishing and provenance.
 
 ## [0.3.0] - 2026-10-25
 

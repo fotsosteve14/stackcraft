@@ -1,6 +1,6 @@
 import { parseArgs } from "node:util";
 
-export const HELP = `Usage: npm create @stackcraft@latest [name] [options]
+export const HELP = `Usage: npm create @beyond.corporation/stackcraft@latest [name] [options]
 
 Without options, every choice is asked interactively.
 

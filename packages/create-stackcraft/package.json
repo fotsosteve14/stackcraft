@@ -1,5 +1,5 @@
 {
-  "name": "@stackcraft/create",
+  "name": "@beyond.corporation/create-stackcraft",
   "version": "0.4.0",
   "description": "Create a ready-to-code Next.js, Vite + React or SvelteKit project with the dependencies you pick.",
   "license": "MIT",
