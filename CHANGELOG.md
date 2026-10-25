@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-25
+
+Vite + React and SvelteKit frameworks, custom themes with dark mode, 2 new modules (18 in total) and a Next.js security fix.
+
 ### Security
 
 - Next.js 16.4.3 (StackCraft and generated projects, with `eslint-config-next` 16.4.3): fixes two unauthenticated remote code executions, in the Image Optimization API with SVG files ([GHSA-2464-fhr4-w9xw](https://github.com/advisories/GHSA-2464-fhr4-w9xw)) and in `use cache` functions returning typed arrays ([GHSA-673q-mjm6-r5xr](https://github.com/advisories/GHSA-673q-mjm6-r5xr)), and a denial of service with Server Actions ([GHSA-p3m5-59mp-jv5r](https://github.com/advisories/GHSA-p3m5-59mp-jv5r)). Projects generated with an earlier version should upgrade `next` to 16.4.3.
@@ -76,6 +80,7 @@ First public version.
 - Generated files are formatted with Prettier.
 - CI workflow, contributing guide and issue templates.
 
-[Unreleased]: https://github.com/fotsosteve14/stackcraft/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/fotsosteve14/stackcraft/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/fotsosteve14/stackcraft/releases/tag/v0.1.0
