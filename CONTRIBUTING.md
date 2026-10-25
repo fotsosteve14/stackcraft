@@ -89,6 +89,6 @@ Architectures live in `packages/core/src/architectures.ts`. An architecture defi
 
 1. In a pull request, set the same `version` in `packages/core`, `packages/create-stackcraft` and `apps/web`, run `npm install` to update the lockfile, and move the `[Unreleased]` notes of the CHANGELOG under the new version.
 2. Once merged, tag the merge commit and push the tag: `git tag -a v1.2.3 -m "StackCraft v1.2.3" && git push origin v1.2.3`.
-3. The Publish workflow (`.github/workflows/publish.yml`) checks that the tag matches the version, runs the tests and publishes `create-stackcraft` to npm with trusted publishing.
+3. The Publish workflow (`.github/workflows/publish.yml`) checks that the tag matches the version, runs the tests and publishes `@stackcraft-app/create` to npm with trusted publishing.
 
 Try the CLI locally before releasing: `npm run build:cli`, then `node packages/create-stackcraft/dist/index.js my-app` from another folder.
