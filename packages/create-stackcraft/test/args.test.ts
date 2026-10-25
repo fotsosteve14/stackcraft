@@ -18,6 +18,7 @@ describe("parseCliArgs", () => {
         "pnpm",
         "--github",
         "private",
+        "--vercel",
         "--no-install",
         "-y",
       ]),
@@ -30,6 +31,7 @@ describe("parseCliArgs", () => {
       packageManager: "pnpm",
       description: undefined,
       github: "private",
+      vercel: true,
       install: false,
       yes: true,
       help: false,
@@ -38,7 +40,8 @@ describe("parseCliArgs", () => {
   });
 
   test("installs by default and asks everything else", () => {
-    expect(parseCliArgs([])).toMatchObject({ name: undefined, modules: undefined, install: true, yes: false });
+    expect(parseCliArgs([])).toMatchObject({ name: undefined, modules: undefined, vercel: undefined, install: true, yes: false });
+    expect(parseCliArgs(["--no-vercel"]).vercel).toBe(false);
   });
 
   test("rejects an unknown --github mode", () => {

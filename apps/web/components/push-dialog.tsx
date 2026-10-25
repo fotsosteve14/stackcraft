@@ -1,7 +1,13 @@
 "use client";
 
-import type { GitHubPushResult, ProjectConfig } from "@stackcraft/core";
-import { useState } from "react";
+import {
+  vercelDeployment,
+  vercelImportUrl,
+  type GitHubPushResult,
+  type ProjectConfig,
+  type VercelDeployment,
+} from "@stackcraft/core";
+import { useMemo, useState } from "react";
 import type { GitHubStatus } from "@/app/api/github/me/route";
 import { Modal } from "./modal";
 
@@ -21,6 +27,7 @@ export function PushDialog({ config, user, onClose, onSignOut }: PushDialogProps
   const [repoName, setRepoName] = useState(config.name);
   const [isPrivate, setIsPrivate] = useState(true);
   const [state, setState] = useState<State>({ step: "form" });
+  const deployment = useMemo(() => vercelDeployment(config), [config]);
 
   const push = async () => {
     setState({ step: "pushing" });
@@ -77,6 +84,7 @@ export function PushDialog({ config, user, onClose, onSignOut }: PushDialogProps
             >
               Open repository ↗
             </a>
+            <VercelDeploy deployment={deployment} repositoryUrl={state.result.url} />
           </div>
         ) : (
           <form
@@ -134,5 +142,38 @@ export function PushDialog({ config, user, onClose, onSignOut }: PushDialogProps
         )}
       </div>
     </Modal>
+  );
+}
+
+/** Vercel's import page for the new repository: Vercel then redeploys on every push. */
+function VercelDeploy({ deployment, repositoryUrl }: { deployment: VercelDeployment; repositoryUrl: string }) {
+  if (!deployment.supported) {
+    return <p className="text-xs text-muted">Vercel: {deployment.reason}</p>;
+  }
+  return (
+    <div className="space-y-2 rounded-lg border border-border p-3">
+      {(deployment.env.length > 0 || deployment.needsDatabase) && (
+        <div className="text-xs text-muted">
+          <p>Set these environment variables in Vercel before deploying:</p>
+          <ul className="mt-1 font-mono">
+            {deployment.env.map((v) => (
+              <li key={v.key}>{v.key}</li>
+            ))}
+          </ul>
+          {deployment.needsDatabase && (
+            <p className="mt-1">Use a hosted database (Neon, Supabase…): the docker-compose PostgreSQL only runs locally.</p>
+          )}
+        </div>
+      )}
+      <a
+        href={vercelImportUrl(repositoryUrl)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block rounded-lg border border-border px-4 py-2.5 text-center font-medium hover:bg-background"
+      >
+        ▲ Deploy to Vercel ↗
+      </a>
+      <p className="text-xs text-muted">Vercel redeploys on every push to main.</p>
+    </div>
   );
 }

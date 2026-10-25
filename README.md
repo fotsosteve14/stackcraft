@@ -52,7 +52,7 @@ npm create @stackcraft-app@latest          # or: npx @stackcraft-app/create@late
 npx @stackcraft-app/create@latest my-app --framework sveltekit --modules tailwind,vitest --theme neutral --github private -y
 ```
 
-Every question has an option (`--framework`, `--arch`, `--modules`, `--theme`, `--pm`, `--github`, `--no-install`, `-y`). Publishing to GitHub uses the [GitHub CLI](https://cli.github.com) (`gh auth login` once). See [packages/create-stackcraft](packages/create-stackcraft/README.md).
+Every question has an option (`--framework`, `--arch`, `--modules`, `--theme`, `--pm`, `--github`, `--vercel`, `--no-install`, `-y`). Publishing to GitHub uses the [GitHub CLI](https://cli.github.com) (`gh auth login` once). Once the repository is on GitHub, the CLI offers to deploy it on Vercel. See [packages/create-stackcraft](packages/create-stackcraft/README.md).
 
 ## Use the API
 

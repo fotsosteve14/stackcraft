@@ -95,8 +95,8 @@ export class InvalidConfigError extends Error {
   }
 }
 
-/** Generates every file of the project described by `config`, formatted with Prettier. */
-export async function generateProject(config: ProjectConfig): Promise<GeneratedProject> {
+/** Applies the framework and every module to a project model, without formatting the files. */
+export function buildProject(config: ProjectConfig): { project: ProjectBuilder; modules: string[] } {
   const errors = validateConfig(config);
   if (errors.length > 0) throw new InvalidConfigError(errors);
 
@@ -107,6 +107,12 @@ export async function generateProject(config: ProjectConfig): Promise<GeneratedP
   framework.applyBase(project);
   for (const id of modules) getModule(id)!.apply(project);
   framework.finalize(project, modules);
+  return { project, modules };
+}
+
+/** Generates every file of the project described by `config`, formatted with Prettier. */
+export async function generateProject(config: ProjectConfig): Promise<GeneratedProject> {
+  const { project, modules } = buildProject(config);
 
   const entries = [...project.files.entries()].sort(([a], [b]) => a.localeCompare(b));
   const formatted = await Promise.all(

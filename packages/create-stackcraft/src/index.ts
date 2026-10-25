@@ -14,6 +14,8 @@ import {
   THEME_PRESETS,
   validateConfig,
   validateProjectName,
+  vercelDeployment,
+  vercelImportUrl,
   type ArchitectureId,
   type FrameworkId,
   type PackageManager,
@@ -23,7 +25,7 @@ import {
 import { resolve } from "node:path";
 import pkg from "../package.json" with { type: "json" };
 import { detectPackageManager, HELP, parseCliArgs, type CliArgs } from "./args";
-import { gitHubCliStatus, initGit, isEmptyDir, publishToGitHub, run, writeProject } from "./project";
+import { gitHubCliStatus, initGit, isEmptyDir, openUrl, publishToGitHub, run, writeProject } from "./project";
 
 /** Stops cleanly when the user presses Ctrl+C or Escape. */
 function answer<T>(value: T): Exclude<T, symbol> {
@@ -200,23 +202,30 @@ async function main(): Promise<void> {
     }
   }
 
-  await maybePublish(args, root, name, config.description);
+  const repositoryUrl = await maybePublish(args, root, name, config.description);
+  if (repositoryUrl) await maybeDeployToVercel(args, config, repositoryUrl);
 
   const steps = [`cd ${name}`, ...(installed ? [] : [`${packageManager} install`]), `${packageManager} run dev`];
   p.note(steps.join("\n"), "Next steps");
   p.outro("Happy coding! The README explains the stack and every module.");
 }
 
-async function maybePublish(args: CliArgs, root: string, name: string, description: string): Promise<void> {
+/** Returns the URL of the new GitHub repository, or undefined when the project was not published. */
+async function maybePublish(
+  args: CliArgs,
+  root: string,
+  name: string,
+  description: string,
+): Promise<string | undefined> {
   const visibility = await askGitHub(args);
 
   // A local repository is useful even without GitHub.
   const gitError = await initGit(root);
   if (gitError) {
     p.log.warn(`Could not create the git repository: ${gitError}`);
-    return;
+    return undefined;
   }
-  if (visibility === "no") return;
+  if (visibility === "no") return undefined;
 
   const status = await gitHubCliStatus(root);
   if (status !== "ready") {
@@ -227,7 +236,7 @@ async function maybePublish(args: CliArgs, root: string, name: string, descripti
     p.log.warn(
       `${fix}, then publish from the project folder:\n  gh repo create ${name} --${visibility} --source . --push`,
     );
-    return;
+    return undefined;
   }
 
   const spin = p.spinner();
@@ -235,10 +244,41 @@ async function maybePublish(args: CliArgs, root: string, name: string, descripti
   try {
     const url = await publishToGitHub(root, name, visibility, description);
     spin.stop(`Published to ${url}`);
+    return url;
   } catch (error) {
     spin.error("GitHub publishing failed");
     p.log.warn(error instanceof Error ? error.message : String(error));
+    return undefined;
   }
+}
+
+/**
+ * Opens Vercel's import page for the new repository: Vercel then deploys it and redeploys on every
+ * push. The CLI never signs in to Vercel itself.
+ */
+async function maybeDeployToVercel(args: CliArgs, config: ProjectConfig, repositoryUrl: string): Promise<void> {
+  const deployment = vercelDeployment(config);
+  if (!deployment.supported) {
+    if (args.vercel) p.log.warn(`Not deploying to Vercel: ${deployment.reason}`);
+    return;
+  }
+
+  const deploy = args.vercel ?? (args.yes ? false : answer(await p.confirm({ message: "Deploy to Vercel?", initialValue: false })));
+  if (!deploy) return;
+
+  if (deployment.env.length > 0 || deployment.needsDatabase) {
+    const lines = deployment.env.map((v) => `${v.key}${v.comment ? `  (${v.comment})` : ""}`);
+    if (deployment.needsDatabase) {
+      lines.push("", "Use a hosted database (Neon, Supabase…): the docker-compose PostgreSQL only runs locally.");
+    }
+    p.note(lines.join("\n"), "Set these environment variables in Vercel before deploying");
+  }
+
+  const url = vercelImportUrl(repositoryUrl);
+  const opened = await openUrl(url);
+  p.log.info(
+    `${opened ? "Opened" : "Open"} ${url}\nPick your team and click Deploy: Vercel redeploys on every push to main.\nIf the page does not show the repository, import it from https://vercel.com/new.`,
+  );
 }
 
 main().catch((error: unknown) => {
