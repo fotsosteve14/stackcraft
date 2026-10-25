@@ -1,14 +1,13 @@
-# create-stackcraft
+# @stackcraft/create
 
 Create a ready-to-code project with the dependencies you pick, already wired together.
 
 ```bash
-npm create stackcraft@latest
+npm create @stackcraft@latest
 # or
-npx create-stackcraft
-pnpm create stackcraft
-yarn create stackcraft
-bun create stackcraft
+npx @stackcraft/create@latest
+pnpm create @stackcraft
+yarn create @stackcraft
 ```
 
 The CLI asks for:
@@ -32,7 +31,7 @@ The project always gets a local git repository with a first commit. To publish i
 Every question can be answered with an option, for scripts and CI:
 
 ```bash
-npx create-stackcraft my-app --framework sveltekit --arch feature --modules tailwind,vitest --theme neutral --github private -y
+npx @stackcraft/create@latest my-app --framework sveltekit --arch feature --modules tailwind,vitest --theme neutral --github private -y
 ```
 
 | Option | Values |
@@ -47,7 +46,7 @@ npx create-stackcraft my-app --framework sveltekit --arch feature --modules tail
 | `--no-install` | skip the dependency install |
 | `-y`, `--yes` | default answer to every question not given as an option |
 
-Run `npx create-stackcraft --help` for the full list.
+Run `npx @stackcraft/create@latest --help` for the full list.
 
 ## Web version
 
