@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-25
+
+Deploy to Vercel from the CLI and the web UI. First release published to npm from GitHub Actions.
+
 ### Added
 
 - **Deploy to Vercel** after publishing to GitHub, in the CLI (question or `--vercel`) and in the web UI. It opens Vercel's import page for the new repository, so Vercel deploys it and redeploys on every push. The environment variables to set (and the need for a hosted database) are listed first. Not offered for SvelteKit with Docker, whose adapter-node cannot run on Vercel.
@@ -95,7 +99,8 @@ First public version.
 - Generated files are formatted with Prettier.
 - CI workflow, contributing guide and issue templates.
 
-[Unreleased]: https://github.com/fotsosteve14/stackcraft/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/fotsosteve14/stackcraft/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.1.0...v0.2.0
