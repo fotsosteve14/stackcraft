@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Deploy to Vercel** after publishing to GitHub, in the CLI (question or `--vercel`) and in the web UI. It opens Vercel's import page for the new repository, so Vercel deploys it and redeploys on every push. The environment variables to set (and the need for a hosted database) are listed first. Not offered for SvelteKit with Docker, whose adapter-node cannot run on Vercel.
+
 ## [0.4.0] - 2026-10-25
 
 The StackCraft CLI, published as `@stackcraft-app/create`.

@@ -92,3 +92,15 @@ export async function publishToGitHub(
 function quoteWindows(arg: string): string {
   return /^[\w./:=@,+-]+$/.test(arg) ? arg : `"${arg.replace(/"/g, '""')}"`;
 }
+
+/** Opens a URL in the default browser. Returns false when no browser could be started. */
+export async function openUrl(url: string): Promise<boolean> {
+  // rundll32 opens the URL as is: going through cmd's `start` would interpret % and &.
+  const [command, ...args] =
+    process.platform === "win32"
+      ? ["rundll32", "url.dll,FileProtocolHandler", url]
+      : process.platform === "darwin"
+        ? ["open", url]
+        : ["xdg-open", url];
+  return (await run(command!, args, process.cwd())).code === 0;
+}

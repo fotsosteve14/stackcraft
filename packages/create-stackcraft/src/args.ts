@@ -12,6 +12,7 @@ Options:
   --pm <name>          npm, pnpm, yarn or bun (default: the one running this command)
   --description <text> Project description
   --github <mode>      Publish to GitHub: public, private or no
+  --vercel             After publishing to GitHub, open the Vercel import page (--no-vercel to skip)
   --no-install         Do not install dependencies
   -y, --yes            Accept the defaults for every question not given as an option
   -h, --help           Show this help
@@ -26,6 +27,7 @@ export interface CliArgs {
   packageManager?: string;
   description?: string;
   github?: "public" | "private" | "no";
+  vercel?: boolean;
   install: boolean;
   yes: boolean;
   help: boolean;
@@ -45,6 +47,7 @@ export function parseCliArgs(argv: string[]): CliArgs {
       pm: { type: "string" },
       description: { type: "string" },
       github: { type: "string" },
+      vercel: { type: "boolean" },
       install: { type: "boolean", default: true },
       yes: { type: "boolean", short: "y", default: false },
       help: { type: "boolean", short: "h", default: false },
@@ -66,6 +69,7 @@ export function parseCliArgs(argv: string[]): CliArgs {
     packageManager: values.pm,
     description: values.description,
     github,
+    vercel: values.vercel,
     install: values.install,
     yes: values.yes,
     help: values.help,
