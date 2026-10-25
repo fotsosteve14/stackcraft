@@ -1,13 +1,13 @@
-# @beyond.corporation/create-stackcraft
+# @stackcraft-app/create
 
 Create a ready-to-code project with the dependencies you pick, already wired together.
 
 ```bash
-npm create @beyond.corporation/stackcraft@latest
+npm create @stackcraft-app@latest
 # or
-npx @beyond.corporation/create-stackcraft@latest
-pnpm create @beyond.corporation/stackcraft
-yarn create @beyond.corporation/stackcraft
+npx @stackcraft-app/create@latest
+pnpm create @stackcraft-app
+yarn create @stackcraft-app
 ```
 
 The CLI asks for:
@@ -31,7 +31,7 @@ The project always gets a local git repository with a first commit. To publish i
 Every question can be answered with an option, for scripts and CI:
 
 ```bash
-npx @beyond.corporation/create-stackcraft@latest my-app --framework sveltekit --arch feature --modules tailwind,vitest --theme neutral --github private -y
+npx @stackcraft-app/create@latest my-app --framework sveltekit --arch feature --modules tailwind,vitest --theme neutral --github private -y
 ```
 
 | Option | Values |
@@ -46,7 +46,7 @@ npx @beyond.corporation/create-stackcraft@latest my-app --framework sveltekit --
 | `--no-install` | skip the dependency install |
 | `-y`, `--yes` | default answer to every question not given as an option |
 
-Run `npx @beyond.corporation/create-stackcraft@latest --help` for the full list.
+Run `npx @stackcraft-app/create@latest --help` for the full list.
 
 ## Web version
 

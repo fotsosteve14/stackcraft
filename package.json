@@ -15,7 +15,7 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "generate": "npm run generate -w @stackcraft/core --",
-    "build:cli": "npm run build -w @beyond.corporation/create-stackcraft"
+    "build:cli": "npm run build -w @stackcraft-app/create"
   },
   "engines": {
     "node": ">=20.9.0"
