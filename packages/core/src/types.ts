@@ -1,11 +1,12 @@
 import type { ArchitectureId } from "./architectures";
 import type { ProjectBuilder } from "./builder";
+import type { ThemeConfig } from "./theme";
 
 export type PackageManager = "npm" | "pnpm" | "yarn" | "bun";
 
 export const PACKAGE_MANAGERS: readonly PackageManager[] = ["npm", "pnpm", "yarn", "bun"];
 
-export type FrameworkId = "nextjs" | "vite-react";
+export type FrameworkId = "nextjs" | "vite-react" | "sveltekit";
 
 export interface ProjectConfig {
   /** npm package name, also used as the root folder name. */
@@ -17,6 +18,8 @@ export interface ProjectConfig {
   architecture: ArchitectureId;
   /** Ids of the selected modules. Required modules are added automatically. */
   modules: string[];
+  /** Custom colors for light and dark mode, with a mode switch. Omitted keeps the framework defaults. */
+  theme?: ThemeConfig;
 }
 
 export type ModuleCategory =
@@ -28,7 +31,8 @@ export type ModuleCategory =
   | "3d"
   | "quality"
   | "testing"
-  | "deployment";
+  | "deployment"
+  | "ai";
 
 export interface StackModule {
   id: string;

@@ -3,6 +3,7 @@ import { ProjectBuilder } from "./builder";
 import { formatFile } from "./format";
 import { getFramework } from "./frameworks";
 import { getModule, MODULES } from "./modules";
+import { validateTheme } from "./theme";
 import { PACKAGE_MANAGERS, type FrameworkId, type GeneratedProject, type ProjectConfig, type StackModule } from "./types";
 
 export interface ResolvedModules {
@@ -80,6 +81,7 @@ export function validateConfig(config: ProjectConfig): string[] {
     errors.push(`Unsupported package manager "${config.packageManager}".`);
   }
   errors.push(...resolveModules(config.modules, config.framework).errors);
+  if (config.theme) errors.push(...validateTheme(config.theme));
   return errors;
 }
 

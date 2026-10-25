@@ -4,7 +4,7 @@
  */
 export const VERSIONS = {
   // Next.js base
-  next: "16.4.0",
+  next: "16.4.3",
   react: "19.3.0",
   "react-dom": "19.3.0",
   typescript: "^5",
@@ -16,7 +16,17 @@ export const VERSIONS = {
   vite: "^8.3.0",
   "@vitejs/plugin-react": "^6.1.2",
 
+  // SvelteKit base (the versions bref-ui is developed against)
+  "@sveltejs/kit": "^2.63.0",
+  "@sveltejs/vite-plugin-svelte": "^7.1.2",
+  "@sveltejs/adapter-auto": "^7.0.0",
+  // Node server output, used when Docker is selected.
+  "@sveltejs/adapter-node": "^5.4.0",
+  svelte: "^5.56.1",
+  "svelte-check": "^4.6.0",
+
   // Styling & UI
+  "bref-ui": "^2.2.3",
   tailwindcss: "^4",
   "@tailwindcss/postcss": "^4",
   "@tailwindcss/vite": "^4",
@@ -60,13 +70,16 @@ export const VERSIONS = {
   // Code quality
   // eslint-config-next 16.4 plugins declare eslint <=9 peers; create-next-app uses ^9 too.
   eslint: "^9",
-  "eslint-config-next": "16.4.0",
+  "eslint-config-next": "16.4.3",
   // ESLint for Vite projects
   "@eslint/js": "^9",
   "typescript-eslint": "^8.71.2",
   "eslint-plugin-react-hooks": "^7.1.1",
   "eslint-plugin-react-refresh": "^0.5.7",
   globals: "^17.13.0",
+  // ESLint and Prettier for SvelteKit projects
+  "eslint-plugin-svelte": "^3.19.0",
+  "prettier-plugin-svelte": "^4.1.0",
   prettier: "^3.9.10",
   "prettier-plugin-tailwindcss": "^0.8.1",
 
@@ -75,6 +88,7 @@ export const VERSIONS = {
   jsdom: "^30.1.2",
   "@testing-library/react": "^16.3.3",
   "@testing-library/dom": "^10.4.2",
+  "@testing-library/svelte": "^5.2.8",
 
   // State & validation
   zustand: "^5.0.15",

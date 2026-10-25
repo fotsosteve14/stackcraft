@@ -1,6 +1,7 @@
 import type { ProjectBuilder } from "../builder";
 import type { FrameworkId } from "../types";
 import { nextjs } from "./nextjs";
+import { sveltekit } from "./sveltekit";
 import { viteReact } from "./vite-react";
 
 export interface Framework {
@@ -20,7 +21,7 @@ export interface Framework {
   finalize(project: ProjectBuilder, moduleIds: string[]): void;
 }
 
-export const FRAMEWORKS: readonly Framework[] = [nextjs, viteReact];
+export const FRAMEWORKS: readonly Framework[] = [nextjs, viteReact, sveltekit];
 
 export function getFramework(id: string): Framework | undefined {
   return FRAMEWORKS.find((f) => f.id === id);

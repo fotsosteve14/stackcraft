@@ -1,4 +1,5 @@
 import type { ProjectBuilder } from "../builder";
+import { tailwindThemeColors, THEME_DARK_VARIANT, themeVariablesCss } from "../theme";
 import type { StackModule } from "../types";
 
 /** Next.js loads Geist with next/font; elsewhere Tailwind's default system font stacks apply. */
@@ -33,6 +34,32 @@ export default config;
       project
         .addDevDependency("tailwindcss", "@tailwindcss/vite")
         .addVitePlugin('import tailwindcss from "@tailwindcss/vite";', "tailwindcss()");
+    }
+
+    const { theme } = project.config;
+    if (theme) {
+      project.addFile(
+        project.paths.css,
+        `@import "tailwindcss";
+
+${THEME_DARK_VARIANT}
+
+@theme inline {
+${tailwindThemeColors()
+  .map((line) => `  ${line}`)
+  .join("\n")}
+${tailwindFontTheme(project)}}
+
+${themeVariablesCss(theme)}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+`,
+      );
+      return;
     }
 
     project.addFile(

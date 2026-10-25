@@ -10,6 +10,21 @@ export { GitHubError, pushToGitHub } from "./github";
 export type { GitHubPushOptions, GitHubPushResult, GitHubRepoOptions } from "./github";
 export { generateZip } from "./zip";
 export { PACKAGE_MANAGERS } from "./types";
+export {
+  contrastRatio,
+  decodeTheme,
+  encodeTheme,
+  getThemePreset,
+  normalizeHex,
+  readableOn,
+  THEME_PRESETS,
+  THEME_ROLES,
+  themeContrastIssues,
+  validateTheme,
+} from "./theme";
+export type { ContrastIssue, ThemeConfig, ThemeMode, ThemePalette, ThemePreset, ThemeRole } from "./theme";
+export { importedCount, parseColor, parseThemeTokens } from "./theme-import";
+export type { ThemeImport } from "./theme-import";
 export type {
   EnvVar,
   FrameworkId,

@@ -1,7 +1,8 @@
 import { getArchitecture } from "../architectures";
 import type { ProjectBuilder } from "../builder";
 import type { Framework } from "./index";
-import { finalizeCommon, homeContent, plainCss } from "./shared";
+import { THEME_SCRIPT } from "../theme";
+import { applyThemeFiles, finalizeCommon, homeContent, plainCss, themeTogglePath } from "./shared";
 
 const NEXT_AGENT_RULES = `<!-- BEGIN:nextjs-agent-rules -->
 
@@ -70,39 +71,7 @@ export const nextjs: Framework = {
       ),
     );
 
-    project.addFile(
-      `${paths.app}/layout.tsx`,
-      `import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: ${JSON.stringify(config.name)},
-  description: ${JSON.stringify(config.description)},
-};
-
-export default function RootLayout({ children }: LayoutProps<"/">) {
-  return (
-    <html
-      lang="en"
-      className={\`\${geistSans.variable} \${geistMono.variable} h-full antialiased\`}
-    >
-      <body className="flex min-h-full flex-col">{children}</body>
-    </html>
-  );
-}
-`,
-    );
+    project.addFile(`${paths.app}/layout.tsx`, renderLayout(project));
 
     project.addFile(paths.css, plainCss(project));
     project.addFile(
@@ -136,6 +105,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     project.applyArchitectureExample();
     project.addFile("next.config.ts", renderNextConfig(project));
     project.addFile(`${project.paths.app}/page.tsx`, renderPage(project));
+    applyThemeFiles(project);
     finalizeCommon(project, this, moduleIds);
   },
 };
@@ -180,6 +150,60 @@ function renderPage(project: ProjectBuilder): string {
   return `${header}export default function Home() {
   return (
     ${homeContent(project, `${project.paths.app}/page.tsx`, link)}
+  );
+}
+`;
+}
+
+function renderLayout(project: ProjectBuilder): string {
+  const { config } = project;
+  const theme = !!config.theme;
+  const toggleImport = theme ? `import { ThemeToggle } from "${project.importPath(themeTogglePath(project))}";\n` : "";
+  const script = theme
+    ? `
+// Sets data-theme on <html> before the first paint, from the saved choice or the system preference.
+const themeScript = \`${THEME_SCRIPT}\`;
+`
+    : "";
+  const body = theme
+    ? `<head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body className="flex min-h-full flex-col">
+        <ThemeToggle />
+        {children}
+      </body>`
+    : `<body className="flex min-h-full flex-col">{children}</body>`;
+
+  return `import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+${toggleImport}import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: ${JSON.stringify(config.name)},
+  description: ${JSON.stringify(config.description)},
+};
+${script}
+export default function RootLayout({ children }: LayoutProps<"/">) {
+  return (
+    <html
+      lang="en"
+      className={\`\${geistSans.variable} \${geistMono.variable} h-full antialiased\`}${
+        theme ? "\n      // The inline script sets data-theme before React hydrates.\n      suppressHydrationWarning" : ""
+      }
+    >
+      ${body}
+    </html>
   );
 }
 `;

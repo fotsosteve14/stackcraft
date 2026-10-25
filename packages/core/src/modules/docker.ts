@@ -1,24 +1,30 @@
 import type { ProjectBuilder } from "../builder";
 import type { PackageManager, StackModule } from "../types";
 
-const INSTALL: Record<PackageManager, { lockfile: string; setup: string; install: string; build: string }> = {
-  npm: { lockfile: "package-lock.json", setup: "", install: "npm ci", build: "npm run build" },
+const INSTALL: Record<
+  PackageManager,
+  { lockfile: string; setup: string; install: string; prodInstall: string; build: string }
+> = {
+  npm: { lockfile: "package-lock.json", setup: "", install: "npm ci", prodInstall: "npm ci --omit=dev", build: "npm run build" },
   pnpm: {
     lockfile: "pnpm-lock.yaml",
     setup: "RUN corepack enable pnpm\n",
     install: "pnpm install --frozen-lockfile",
+    prodInstall: "pnpm install --frozen-lockfile --prod",
     build: "pnpm run build",
   },
   yarn: {
     lockfile: "yarn.lock",
     setup: "RUN corepack enable\n",
     install: "yarn install --frozen-lockfile",
+    prodInstall: "yarn install --frozen-lockfile --production",
     build: "yarn build",
   },
   bun: {
     lockfile: "bun.lock",
     setup: "RUN npm install -g bun\n",
     install: "bun install --frozen-lockfile",
+    prodInstall: "bun install --frozen-lockfile --production",
     build: "bun run build",
   },
 };
@@ -26,11 +32,49 @@ const INSTALL: Record<PackageManager, { lockfile: string; setup: string; install
 export const docker: StackModule = {
   id: "docker",
   name: "Docker",
-  description: "Production Dockerfile (Next.js standalone server, or nginx for SPAs) and docker-compose for local services.",
+  description:
+    "Production Dockerfile (Node server for Next.js and SvelteKit, nginx for SPAs) and docker-compose for local services.",
   category: "deployment",
   homepage: "https://nextjs.org/docs/app/getting-started/deploying#docker",
   apply(project) {
     const pm = INSTALL[project.config.packageManager];
+
+    if (project.config.framework === "sveltekit") {
+      // svelte.config.js switches to adapter-node when Docker is selected: `node build` starts the server.
+      project.addFile(
+        "Dockerfile",
+        `# syntax=docker/dockerfile:1
+FROM node:24-alpine AS builder
+WORKDIR /app
+${pm.setup}COPY package.json ${pm.lockfile} ./
+RUN ${pm.install}
+COPY . .
+RUN ${pm.build}
+
+FROM node:24-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+${pm.setup}COPY package.json ${pm.lockfile} ./
+RUN ${pm.prodInstall}
+COPY --from=builder /app/build ./build
+
+USER node
+EXPOSE 3000
+ENV PORT=3000
+ENV HOST=0.0.0.0
+
+CMD ["node", "build"]
+`,
+      );
+      project.addFile(
+        ".dockerignore",
+        ["node_modules", ".svelte-kit", "build", ".git", "Dockerfile", ".dockerignore", ".env*", "!.env.example", "coverage"].join(
+          "\n",
+        ),
+      );
+      project.addReadmeSection("Docker", dockerReadme(project, false, pm.lockfile));
+      return;
+    }
 
     if (project.config.framework !== "nextjs") {
       // A SPA is static files: build with Node, serve with nginx.

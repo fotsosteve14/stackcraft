@@ -6,6 +6,7 @@ export const motion: StackModule = {
   description: "Production-ready animations for React (formerly Framer Motion).",
   category: "ui",
   homepage: "https://motion.dev",
+  frameworks: ["nextjs", "vite-react"],
   apply(project) {
     const { paths } = project;
     // Animated Icons pins its own exact Motion version: keep it so the icons animate as designed.

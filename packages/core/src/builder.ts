@@ -43,6 +43,11 @@ export class ProjectBuilder {
     return this.config.framework === "nextjs" ? '"use client";\n\n' : "";
   }
 
+  /** Tailwind classes for secondary text: the theme color when there is one, zinc otherwise. */
+  get mutedTextClass(): string {
+    return this.has("shadcn") || this.config.theme ? "text-muted-foreground" : "text-zinc-600 dark:text-zinc-400";
+  }
+
   /** Font stacks: Geist via next/font with Next.js, system fonts elsewhere. */
   get fonts(): { sans: string; mono: string } {
     return this.config.framework === "nextjs"
@@ -71,8 +76,14 @@ export class ProjectBuilder {
     return this;
   }
 
-  /** Import specifier for a project file or folder: "src/shared/lib/utils.ts" → "@/shared/lib/utils". */
+  /**
+   * Import specifier for a project file or folder: "src/shared/lib/utils.ts" → "@/shared/lib/utils".
+   * SvelteKit has its own alias for src/lib: "src/lib/ui/index.ts" → "$lib/ui".
+   */
   importPath(path: string): string {
+    if (this.config.framework === "sveltekit" && path.startsWith("src/lib/")) {
+      return `$lib/${path.slice("src/lib/".length).replace(/(\/index)?\.(tsx?|mts)$/, "")}`;
+    }
     const { srcDir } = this.paths;
     const relative = srcDir && path.startsWith(srcDir) ? path.slice(srcDir.length) : path;
     return `@/${relative.replace(/(\/index)?\.(tsx?|mts)$/, "")}`;

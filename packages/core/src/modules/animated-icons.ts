@@ -16,6 +16,7 @@ export const animatedIcons: StackModule = {
   description: "MIT animated icons (Hugeicons, Tabler, Phosphor, Heroicons) installable with the shadcn CLI.",
   category: "ui",
   homepage: CATALOG,
+  frameworks: ["nextjs", "vite-react"],
   requires: ["shadcn"],
   apply(project) {
     Object.assign(project.dependencies, MOTION_VERSIONS);

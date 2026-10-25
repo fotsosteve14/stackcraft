@@ -74,6 +74,19 @@ const simple: Architecture = {
       auth: "src/auth.ts",
       generated: "src/generated",
     },
+    sveltekit: {
+      srcDir: "src/",
+      app: "src/routes",
+      css: "src/app.css",
+      components: "src/lib/components",
+      ui: "src/lib/ui",
+      lib: "src/lib",
+      hooks: "src/lib/hooks",
+      stores: "src/lib/stores",
+      db: "src/lib/server/db",
+      auth: "src/lib/server/auth.ts",
+      generated: "src/lib/generated",
+    },
   },
   tree: {
     nextjs: `app/            Routes, layouts and pages
@@ -87,6 +100,11 @@ stores/         Client state`,
   components/     React components (ui/ for primitives)
   lib/            Utilities
   stores/         Client state`,
+    sveltekit: `src/
+  app.html        Page template
+  app.css         Global styles
+  routes/         Pages, layouts and load functions
+  lib/            Imported as $lib (components/, server/ for server-only code)`,
   },
 };
 
@@ -121,6 +139,19 @@ const feature: Architecture = {
       auth: "src/server/auth.ts",
       generated: "src/generated",
     },
+    sveltekit: {
+      srcDir: "src/",
+      app: "src/routes",
+      css: "src/app.css",
+      components: "src/lib/shared/components",
+      ui: "src/lib/shared/ui",
+      lib: "src/lib/shared/utils",
+      hooks: "src/lib/shared/hooks",
+      stores: "src/lib/shared/stores",
+      db: "src/lib/server/db",
+      auth: "src/lib/server/auth.ts",
+      generated: "src/lib/generated",
+    },
   },
   tree: {
     nextjs: `src/
@@ -145,17 +176,33 @@ Rule of thumb: a feature may import from shared/ and server/, never from another
   shared/             Code used by several features (ui/, lib/, stores/)
 
 Rule of thumb: a feature may import from shared/, never from another feature.`,
+    sveltekit: `src/
+  routes/             Routes only: thin pages whose load functions call features
+  lib/
+    features/
+      users/          One folder per feature
+        components/   UI of the feature
+        queries.ts    Data access of the feature
+        types.ts
+    shared/           Code used by several features (ui/, utils/, stores/)
+    server/           Server-only infrastructure (db/, auth.ts)
+
+Rule of thumb: a feature may import from shared/ and server/, never from another feature.`,
   },
   applyExample(project) {
     const ctx = exampleContext(project);
     const next = project.config.framework === "nextjs";
+    const svelte = project.config.framework === "sveltekit";
+    // SvelteKit code lives under src/lib so it can be imported as $lib.
+    const root = svelte ? "src/lib/features/users" : "src/features/users";
     if (next) addRouteBoundaries(project, ctx);
+    if (svelte) addSvelteErrorPage(project, ctx);
 
-    project.addFile("src/features/users/types.ts", USER_TYPE);
+    project.addFile(`${root}/types.ts`, USER_TYPE);
 
     const dbHint = project.has("prisma") || project.has("drizzle") ? ` (see ${project.importPath(project.paths.db)})` : "";
     project.addFile(
-      "src/features/users/queries.ts",
+      `${root}/queries.ts`,
       next
         ? `import { cacheLife } from "next/cache";
 import type { User } from "./types";
@@ -172,7 +219,7 @@ export async function getUsers(): Promise<User[]> {
 `
         : `import type { User } from "./types";
 
-/** Data access for the users feature. Replace the in-memory list with a call to your API. */
+/** Data access for the users feature. Replace the in-memory list with ${svelte ? `your database${dbHint}` : "a call to your API"}. */
 export async function getUsers(): Promise<User[]> {
   return ${USERS};
 }
@@ -181,7 +228,7 @@ export async function getUsers(): Promise<User[]> {
 
     if (project.has("zod")) {
       project.addFile(
-        "src/features/users/schema.ts",
+        `${root}/schema.ts`,
         `import { z } from "zod";
 
 export const createUserSchema = z.object({
@@ -192,6 +239,18 @@ export const createUserSchema = z.object({
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 `,
       );
+    }
+
+    if (svelte) {
+      project.addFile(`${root}/components/user-list.svelte`, svelteUserList(ctx, "../types"));
+      addSvelteUsersRoute(
+        project,
+        ctx,
+        `import { getUsers } from "$lib/features/users/queries";`,
+        "getUsers()",
+        "$lib/features/users/components/user-list.svelte",
+      );
+      return;
     }
 
     project.addFile("src/features/users/components/user-list.tsx", userListComponent(ctx, "../types"));
@@ -249,6 +308,19 @@ const clean: Architecture = {
       auth: "src/infrastructure/auth.ts",
       generated: "src/generated",
     },
+    sveltekit: {
+      srcDir: "src/",
+      app: "src/routes",
+      css: "src/app.css",
+      components: "src/lib/components",
+      ui: "src/lib/components/ui",
+      lib: "src/lib/utils",
+      hooks: "src/lib/hooks",
+      stores: "src/lib/stores",
+      db: "src/lib/infrastructure/database",
+      auth: "src/lib/infrastructure/auth.ts",
+      generated: "src/lib/generated",
+    },
   },
   tree: {
     nextjs: `src/
@@ -269,16 +341,31 @@ Dependencies point inward: app → application → domain, infrastructure → do
   components/         Presentation: React components call use cases from the container
 
 Dependencies point inward: components → application → domain, infrastructure → domain.`,
+    sveltekit: `src/
+  routes/             Presentation: load functions call use cases from the container
+  lib/
+    domain/           Entities and repository interfaces. Pure TypeScript, no framework.
+    application/      Use cases: the business rules, depending only on domain/
+    infrastructure/   Implementations: database, auth, external services
+      container.ts    Composition root: wires implementations into use cases
+    components/       Presentation: Svelte components
+
+Dependencies point inward: routes → application → domain, infrastructure → domain.`,
   },
   applyExample(project) {
     const ctx = exampleContext(project);
     const next = project.config.framework === "nextjs";
+    const svelte = project.config.framework === "sveltekit";
+    // SvelteKit layers live under src/lib and are imported through $lib.
+    const src = svelte ? "src/lib" : "src";
+    const at = svelte ? "$lib/" : "@/";
     if (next) addRouteBoundaries(project, ctx);
+    if (svelte) addSvelteErrorPage(project, ctx);
 
-    project.addFile("src/domain/entities/user.ts", USER_TYPE);
+    project.addFile(`${src}/domain/entities/user.ts`, USER_TYPE);
 
     project.addFile(
-      "src/domain/repositories/user-repository.ts",
+      `${src}/domain/repositories/user-repository.ts`,
       `import type { User } from "../entities/user";
 
 export interface UserRepository {
@@ -288,9 +375,9 @@ export interface UserRepository {
     );
 
     project.addFile(
-      "src/application/use-cases/list-users.ts",
-      `import type { User } from "@/domain/entities/user";
-import type { UserRepository } from "@/domain/repositories/user-repository";
+      `${src}/application/use-cases/list-users.ts`,
+      `import type { User } from "${at}domain/entities/user";
+import type { UserRepository } from "${at}domain/repositories/user-repository";
 
 /** Lists users sorted by name. */
 export function listUsers(users: UserRepository) {
@@ -304,13 +391,13 @@ export function listUsers(users: UserRepository) {
 
     const hint = project.has("prisma") || project.has("drizzle")
       ? `a database-backed implementation using ${project.importPath(project.paths.db)}`
-      : next
+      : next || svelte
         ? "a database-backed implementation"
         : "an implementation that calls your API";
     project.addFile(
-      "src/infrastructure/repositories/in-memory-user-repository.ts",
-      `import type { User } from "@/domain/entities/user";
-import type { UserRepository } from "@/domain/repositories/user-repository";
+      `${src}/infrastructure/repositories/in-memory-user-repository.ts`,
+      `import type { User } from "${at}domain/entities/user";
+import type { UserRepository } from "${at}domain/repositories/user-repository";
 
 /** Replace with ${hint}. */
 export class InMemoryUserRepository implements UserRepository {
@@ -327,8 +414,8 @@ export class InMemoryUserRepository implements UserRepository {
     );
 
     project.addFile(
-      "src/infrastructure/container.ts",
-      `import { listUsers } from "@/application/use-cases/list-users";
+      `${src}/infrastructure/container.ts`,
+      `import { listUsers } from "${at}application/use-cases/list-users";
 import { InMemoryUserRepository } from "./repositories/in-memory-user-repository";
 
 const userRepository = new InMemoryUserRepository();
@@ -339,6 +426,18 @@ export const useCases = {
 };
 `,
     );
+
+    if (svelte) {
+      project.addFile("src/lib/components/user-list.svelte", svelteUserList(ctx, "$lib/domain/entities/user"));
+      addSvelteUsersRoute(
+        project,
+        ctx,
+        `import { useCases } from "$lib/infrastructure/container";`,
+        "useCases.listUsers()",
+        "$lib/components/user-list.svelte",
+      );
+      return;
+    }
 
     project.addFile("src/components/user-list.tsx", userListComponent(ctx, "@/domain/entities/user"));
 
@@ -379,7 +478,7 @@ interface ExampleContext {
 function exampleContext(project: ProjectBuilder): ExampleContext {
   return {
     tw: project.has("tailwind"),
-    muted: project.has("shadcn") ? "text-muted-foreground" : "text-zinc-600 dark:text-zinc-400",
+    muted: project.mutedTextClass,
   };
 }
 
@@ -528,6 +627,84 @@ export function UsersSection() {
   );
 }
 `;
+}
+
+/** SvelteKit's error boundary: +error.svelte renders thrown errors and unknown routes. */
+function addSvelteErrorPage(project: ProjectBuilder, { tw, muted }: ExampleContext): void {
+  const main = tw
+    ? ' class="flex min-h-screen flex-col items-center justify-center gap-4 p-8 text-center"'
+    : ' class="page"';
+  project.addFile(
+    `${project.paths.app}/+error.svelte`,
+    `<script lang="ts">
+  import { resolve } from "$app/paths";
+  import { page } from "$app/state";
+</script>
+
+<main${main}>
+  <h1${tw ? ' class="text-2xl font-bold"' : ""}>{page.status === 404 ? "Page not found" : "Something went wrong"}</h1>
+  <p${tw ? ` class="${muted}"` : ""}>{page.error?.message ?? "An unexpected error occurred."}</p>
+  <a href={resolve("/")}${tw ? ' class="text-sm font-medium underline underline-offset-4"' : ""}>Back to home</a>
+</main>
+`,
+  );
+}
+
+function svelteUserList({ tw, muted }: ExampleContext, typesImport: string): string {
+  return `<script lang="ts">
+  import type { User } from "${typesImport}";
+
+  let { users }: { users: User[] } = $props();
+</script>
+
+<ul${tw ? ' class="w-full max-w-md divide-y rounded-lg border"' : ""}>
+  {#each users as user (user.id)}
+    <li${tw ? ' class="flex flex-col p-4 text-left"' : ""}>
+      <span${tw ? ' class="font-medium"' : ""}>{user.name}</span>
+      <span${tw ? ` class="text-sm ${muted}"` : ""}>{user.email}</span>
+    </li>
+  {/each}
+</ul>
+`;
+}
+
+/**
+ * /users route: the load function fetches the data, the page only renders it.
+ * A server load, so the data layer can use a database or private env vars without reaching the browser.
+ */
+function addSvelteUsersRoute(
+  project: ProjectBuilder,
+  { tw }: ExampleContext,
+  imports: string,
+  load: string,
+  listImport: string,
+): void {
+  const { app } = project.paths;
+  project.addFile(
+    `${app}/users/+page.server.ts`,
+    `${imports}
+import type { PageServerLoad } from "./$types";
+
+export const load: PageServerLoad = async () => {
+  return { users: await ${load} };
+};
+`,
+  );
+  project.addFile(
+    `${app}/users/+page.svelte`,
+    `<script lang="ts">
+  import UserList from "${listImport}";
+  import type { PageProps } from "./$types";
+
+  let { data }: PageProps = $props();
+</script>
+
+<main${tw ? ' class="flex min-h-screen flex-col items-center gap-6 p-8"' : ' class="page"'}>
+  <h1${tw ? ' class="text-2xl font-bold"' : ""}>Users</h1>
+  <UserList users={data.users} />
+</main>
+`,
+  );
 }
 
 export const ARCHITECTURES: readonly Architecture[] = [simple, feature, clean];

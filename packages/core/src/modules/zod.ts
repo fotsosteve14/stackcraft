@@ -9,6 +9,28 @@ export const zod: StackModule = {
   apply(project) {
     project.addDependency("zod");
 
+    if (project.config.framework === "sveltekit") {
+      // $lib/server cannot be imported from client code: SvelteKit fails the build if it is.
+      project.addFile(
+        "src/lib/server/env.ts",
+        `import { env as privateEnv } from "$env/dynamic/private";
+import { z } from "zod";
+
+/**
+ * Validated server-side environment variables. Variables prefixed with PUBLIC_ are
+ * readable in the browser through $env/dynamic/public: never put secrets in those.
+ */
+const envSchema = z.object({
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  // DATABASE_URL: z.url(),
+});
+
+export const env = envSchema.parse(privateEnv);
+`,
+      );
+      return;
+    }
+
     if (project.config.framework !== "nextjs") {
       project.addFile(
         `${project.paths.lib}/env.ts`,

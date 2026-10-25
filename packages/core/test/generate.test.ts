@@ -6,6 +6,7 @@ import {
   InvalidConfigError,
   MODULES,
   resolveModules,
+  supportsFramework,
   validateConfig,
   type ProjectConfig,
 } from "../src";
@@ -128,7 +129,9 @@ describe("generateProject", () => {
   });
 
   test("every module generates without errors alongside the others", async () => {
-    const all = MODULES.map((m) => m.id).filter((id) => id !== "drizzle" && id !== "better-auth");
+    const all = MODULES.filter((m) => supportsFramework(m, "nextjs"))
+      .map((m) => m.id)
+      .filter((id) => id !== "drizzle" && id !== "better-auth");
     const { modules } = await generateProject({ ...base, modules: all });
     expect(modules).toHaveLength(all.length);
   });
@@ -196,6 +199,115 @@ describe("vite + react", () => {
   });
 });
 
+describe("sveltekit", () => {
+  const kit: ProjectConfig = { ...base, framework: "sveltekit" };
+
+  test("React and server-side modules are not available", () => {
+    expect(validateConfig({ ...kit, modules: ["shadcn", "prisma"] })).toEqual([
+      '"shadcn/ui" is not available for SvelteKit.',
+      '"Prisma" is not available for SvelteKit.',
+    ]);
+    expect(validateConfig({ ...base, modules: ["bref-ui"] })).toEqual(['"bref-ui" is not available for Next.js.']);
+  });
+
+  test("generates a SvelteKit project with runes and adapter-auto", async () => {
+    const { files } = await generateProject(kit);
+    const json = pkg(files);
+    expect(json.type).toBe("module");
+    expect(json.scripts.typecheck).toBe("svelte-kit sync && svelte-check --tsconfig ./tsconfig.json");
+    expect(json.devDependencies["@sveltejs/adapter-auto"]).toBeDefined();
+    expect(json.dependencies).toEqual({});
+    expect(JSON.parse(files["tsconfig.json"]!).extends).toBe("./.svelte-kit/tsconfig.json");
+    expect(files["svelte.config.js"]).toContain('import adapter from "@sveltejs/adapter-auto"');
+    expect(files["svelte.config.js"]).toContain("runes:");
+    expect(files["vite.config.ts"]).toContain("plugins: [sveltekit()]");
+    expect(files["src/app.html"]).toContain("%sveltekit.body%");
+    expect(files["src/routes/+layout.svelte"]).toContain('import "../app.css"');
+    expect(files["src/routes/+page.svelte"]).toContain('<main class="page">');
+    expect(files[".gitignore"]).toContain("/.svelte-kit");
+  });
+
+  test("bref-ui renders its Theme in the layout and a Button on the home page", async () => {
+    const { files } = await generateProject({ ...kit, modules: ["bref-ui"] });
+    expect(pkg(files).dependencies["bref-ui"]).toBe("^2.2.3");
+    expect(files["src/routes/+layout.svelte"]).toContain('import { Theme } from "bref-ui"');
+    expect(files["src/routes/+layout.svelte"]).toContain("<Theme />");
+    expect(files["src/routes/+page.svelte"]).toContain('import { Button } from "bref-ui"');
+    expect(files["src/app.css"]).not.toContain("--background");
+    expect(files["README.md"]).toContain("bunx bref-ui add button");
+  });
+
+  test("svelte-ai-tools sets up the Svelte plugin and MCP server for each client", async () => {
+    expect(validateConfig({ ...base, modules: ["svelte-ai-tools"] })).toEqual([
+      '"Svelte AI tools" is not available for Next.js.',
+    ]);
+    const { files } = await generateProject({ ...kit, modules: ["svelte-ai-tools"] });
+    expect(files["AGENTS.md"]).toContain("### 3. svelte-autofixer");
+    expect(files["GEMINI.md"]).toBe(files["AGENTS.md"]);
+    expect(files[".claude/CLAUDE.md"]).toBe("@../AGENTS.md\n");
+    expect(JSON.parse(files[".claude/settings.json"]!).enabledPlugins).toEqual({ "svelte@svelte": true });
+    expect(JSON.parse(files[".opencode/opencode.json"]!).plugin).toEqual(["@sveltejs/opencode"]);
+    expect(JSON.parse(files[".cursor/mcp.json"]!).mcpServers.svelte.url).toBe("https://mcp.svelte.dev/mcp");
+    expect(JSON.parse(files[".vscode/mcp.json"]!).servers.svelte.url).toBe("https://mcp.svelte.dev/mcp");
+    expect(JSON.parse(files[".gemini/settings.json"]!).mcpServers.svelte.url).toBe("https://mcp.svelte.dev/mcp");
+    expect(files["README.md"]).toContain("## Svelte AI tools");
+  });
+
+  test("escapes the description in Svelte markup and formats .svelte files", async () => {
+    const { files } = await generateProject({ ...kit, description: 'Use {braces} & "quotes"' });
+    expect(files["src/routes/+page.svelte"]).toContain("Use &#123;braces&#125; &amp; &quot;quotes&quot;");
+    expect(files["src/routes/+layout.svelte"]).toContain('content="Use &#123;braces&#125;');
+    expect(files["src/routes/+page.svelte"]).toContain('<main class="page">\n');
+  });
+
+  test("vitest stubs matchMedia for bref-ui", async () => {
+    const { files } = await generateProject({ ...kit, modules: ["bref-ui", "vitest"] });
+    expect(files["vite.config.ts"]).toContain('setupFiles: ["./src/vitest-setup.ts"]');
+    expect(files["src/vitest-setup.ts"]).toContain("window.matchMedia");
+  });
+
+  test("modules switch to their SvelteKit setup", async () => {
+    const { files } = await generateProject({
+      ...kit,
+      modules: ["bref-ui", "tailwind", "zod", "eslint", "prettier", "vitest", "docker"],
+    });
+    const json = pkg(files);
+    expect(files["vite.config.ts"]).toContain("plugins: [tailwindcss(), sveltekit(), svelteTesting()]");
+    expect(files["vite.config.ts"]).toContain('environment: "jsdom"');
+    expect(files["src/routes/page.test.ts"]).toContain('import Page from "./+page.svelte"');
+    expect(json.devDependencies["@testing-library/svelte"]).toBeDefined();
+    expect(json.devDependencies["@testing-library/react"]).toBeUndefined();
+    expect(files["src/lib/server/env.ts"]).toContain("$env/dynamic/private");
+    expect(files["eslint.config.js"]).toContain("svelte.configs.recommended");
+    expect(JSON.parse(files[".prettierrc.json"]!).plugins).toEqual(["prettier-plugin-svelte", "prettier-plugin-tailwindcss"]);
+    expect(files[".prettierignore"]).toContain(".svelte-kit");
+    expect(files["svelte.config.js"]).toContain('import adapter from "@sveltejs/adapter-node"');
+    expect(json.devDependencies["@sveltejs/adapter-auto"]).toBeUndefined();
+    expect(files["Dockerfile"]).toContain('CMD ["node", "build"]');
+    expect(files["src/routes/+page.svelte"]).toContain('class="flex min-h-screen');
+  });
+
+  test("feature-based example lives under $lib with a load function", async () => {
+    const { files } = await generateProject({ ...kit, architecture: "feature", modules: ["zod"] });
+    expect(files["src/lib/features/users/queries.ts"]).toContain("export async function getUsers");
+    expect(files["src/lib/features/users/schema.ts"]).toContain("z.email()");
+    expect(files["src/lib/features/users/components/user-list.svelte"]).toContain("{#each users as user (user.id)}");
+    expect(files["src/routes/users/+page.server.ts"]).toContain('from "$lib/features/users/queries"');
+    expect(files["src/routes/users/+page.svelte"]).toContain("let { data }: PageProps = $props()");
+    expect(files["src/routes/+error.svelte"]).toContain('import { page } from "$app/state"');
+    expect(files["src/routes/+page.svelte"]).toContain('href={resolve("/users")}');
+    expect(Object.keys(files).some((f) => f.startsWith("src/features/"))).toBe(false);
+  });
+
+  test("clean architecture imports its layers through $lib", async () => {
+    const { files } = await generateProject({ ...kit, architecture: "clean" });
+    expect(files["src/lib/application/use-cases/list-users.ts"]).toContain('from "$lib/domain/entities/user"');
+    expect(files["src/lib/infrastructure/container.ts"]).toContain('from "$lib/application/use-cases/list-users"');
+    expect(files["src/routes/users/+page.server.ts"]).toContain("useCases.listUsers()");
+    expect(files["README.md"]).toContain("load functions call use cases");
+  });
+});
+
 describe("motion and three", () => {
   test("motion uses the standalone version, or the icons' exact pin when both are selected", async () => {
     const alone = await generateProject({ ...base, modules: ["motion"] });
@@ -247,7 +359,9 @@ test("react compiler enables reactCompiler in next.config", async () => {
 });
 
 describe("architectures", () => {
-  const all = MODULES.map((m) => m.id).filter((id) => id !== "drizzle" && id !== "better-auth");
+  const all = MODULES.filter((m) => supportsFramework(m, "nextjs"))
+    .map((m) => m.id)
+    .filter((id) => id !== "drizzle" && id !== "better-auth");
 
   test("rejects unknown architectures", () => {
     expect(validateConfig({ ...base, architecture: "mvc" as never })).toEqual(['Unknown architecture "mvc".']);

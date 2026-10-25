@@ -10,6 +10,7 @@ import {
   PACKAGE_MANAGERS,
   resolveModules,
   supportsFramework,
+  THEME_PRESETS,
   validateConfig,
   type FrameworkId,
   type ProjectConfig,
@@ -21,6 +22,7 @@ import { DependencyPicker } from "./dependency-picker";
 import type { GitHubStatus } from "@/app/api/github/me/route";
 import { Explorer } from "./explorer";
 import { PushDialog } from "./push-dialog";
+import { ThemeEditor } from "./theme-editor";
 
 const FRAMEWORK_OPTIONS = [
   ...FRAMEWORKS.map((f) => ({ id: f.id as string, label: f.name, available: true })),
@@ -306,6 +308,18 @@ export function Configurator() {
                 />
               </label>
             </div>
+          </Field>
+
+          <Field label="Theme">
+            <Segmented
+              options={[
+                { id: "default", label: "Framework defaults" },
+                { id: "custom", label: "Custom colors & dark mode" },
+              ]}
+              value={config.theme ? "custom" : "default"}
+              onChange={(id) => update({ theme: id === "custom" ? (config.theme ?? THEME_PRESETS[0]!.theme) : undefined })}
+            />
+            {config.theme && <ThemeEditor theme={config.theme} onChange={(theme) => update({ theme })} />}
           </Field>
         </section>
 

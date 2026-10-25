@@ -1,6 +1,6 @@
 import type { ProjectBuilder } from "../builder";
 import type { Framework } from "./index";
-import { finalizeCommon, homeContent, plainCss } from "./shared";
+import { applyThemeFiles, finalizeCommon, homeContent, plainCss, themeScriptTag, themeTogglePath } from "./shared";
 
 // TypeScript 6 is what create-vite 9.2 ships; Next.js projects stay on TypeScript 5.
 const TYPESCRIPT = "~6.0.2";
@@ -101,7 +101,7 @@ export const viteReact: Framework = {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="${escapeHtml(config.description)}" />
-    <title>${escapeHtml(config.name)}</title>
+    <title>${escapeHtml(config.name)}</title>${config.theme ? themeScriptTag("    ") : ""}
   </head>
   <body>
     <div id="root"></div>
@@ -121,10 +121,12 @@ export const viteReact: Framework = {
       `import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "${project.importPath(paths.css)}";
-import App from "${project.importPath(`${paths.app}/App.tsx`)}";
+import App from "${project.importPath(`${paths.app}/App.tsx`)}";${
+        config.theme ? `\nimport { ThemeToggle } from "${project.importPath(themeTogglePath(project))}";` : ""
+      }
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
+  <StrictMode>${config.theme ? "\n    <ThemeToggle />" : ""}
     <App />
   </StrictMode>,
 );
@@ -146,6 +148,7 @@ createRoot(document.getElementById("root")!).render(
     project.applyArchitectureExample();
     project.addFile("vite.config.ts", renderViteConfig(project));
     project.addFile(`${project.paths.app}/App.tsx`, renderApp(project));
+    applyThemeFiles(project);
     finalizeCommon(project, this, moduleIds);
   },
 };

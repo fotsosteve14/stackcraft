@@ -12,18 +12,26 @@ export const prettier: StackModule = {
       .addScript("format", "prettier --write .")
       .addScript("format:check", "prettier --check .");
 
-    const config: Record<string, unknown> = {};
-    if (project.has("tailwind")) {
-      project.addDevDependency("prettier-plugin-tailwindcss");
-      config.plugins = ["prettier-plugin-tailwindcss"];
-      config.tailwindStylesheet = `./${project.paths.css}`;
-    }
+    const { framework } = project.config;
+    const svelte = framework === "sveltekit";
+    const tailwind = project.has("tailwind");
+    if (svelte) project.addDevDependency("prettier-plugin-svelte");
+    if (tailwind) project.addDevDependency("prettier-plugin-tailwindcss");
+    // The Tailwind plugin must come last: it wraps the other plugins' parsers.
+    const plugins = [...(svelte ? ["prettier-plugin-svelte"] : []), ...(tailwind ? ["prettier-plugin-tailwindcss"] : [])];
+    const config = {
+      plugins: plugins.length > 0 ? plugins : undefined,
+      tailwindStylesheet: tailwind ? `./${project.paths.css}` : undefined,
+      overrides: svelte ? [{ files: "*.svelte", options: { parser: "svelte" } }] : undefined,
+    };
     project.addFile(".prettierrc.json", JSON.stringify(config, null, 2));
 
     const ignores =
-      project.config.framework === "nextjs"
+      framework === "nextjs"
         ? ["node_modules", ".next", "out", "build", "coverage"]
-        : ["node_modules", "dist", "coverage"];
+        : framework === "sveltekit"
+          ? ["node_modules", ".svelte-kit", "build", "coverage"]
+          : ["node_modules", "dist", "coverage"];
     if (project.has("prisma")) ignores.push(project.paths.generated);
     if (project.has("drizzle")) ignores.push("drizzle");
     project.addFile(".prettierignore", ignores.join("\n"));

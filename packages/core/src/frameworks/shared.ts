@@ -1,6 +1,14 @@
 import { getArchitecture } from "../architectures";
 import type { ProjectBuilder } from "../builder";
 import { MODULES } from "../modules";
+import {
+  reactThemeToggle,
+  svelteThemeToggle,
+  THEME_SCRIPT,
+  THEME_TOGGLE_CSS,
+  themeReadme,
+  themeVariablesCss,
+} from "../theme";
 import type { Framework } from "./index";
 
 function sortKeys(record: Record<string, string>): Record<string, string> {
@@ -112,7 +120,7 @@ export function homeContent(project: ProjectBuilder, editPath: string, extra: st
   }
 
   const shadcn = project.has("shadcn");
-  const muted = shadcn ? "text-muted-foreground" : "text-zinc-600 dark:text-zinc-400";
+  const muted = project.mutedTextClass;
   return `<main className="flex flex-1 flex-col items-center justify-center gap-6 p-8 text-center">
       <h1 className="text-4xl font-bold tracking-tight">${title}</h1>
       <p className="max-w-md text-lg ${muted}">${subtitle}</p>${
@@ -134,19 +142,24 @@ export function homeContent(project: ProjectBuilder, editPath: string, extra: st
 /** Base stylesheet used when Tailwind is not selected. */
 export function plainCss(project: ProjectBuilder): string {
   const { sans, mono } = project.fonts;
-  return `:root {
+  const { theme } = project.config;
+  // Muted text is --muted-foreground, as in shadcn/ui: with a theme, --muted is a surface color.
+  const variables = theme
+    ? themeVariablesCss(theme)
+    : `:root {
   --background: #ffffff;
   --foreground: #171717;
-  --muted: #666666;
+  --muted-foreground: #666666;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
-    --muted: #a1a1a1;
+    --muted-foreground: #a1a1a1;
   }
-}
+}`;
+  return `${variables}
 
 * {
   box-sizing: border-box;
@@ -180,7 +193,7 @@ body {
 .page p {
   margin: 0;
   max-width: 28rem;
-  color: var(--muted);
+  color: var(--muted-foreground);
 }
 
 .page code {
@@ -195,4 +208,31 @@ body {
   width: 100%;
 }
 `;
+}
+
+/** Theme switch component and README section, once the stylesheet is final. No-op without a theme. */
+export function applyThemeFiles(project: ProjectBuilder): void {
+  const { theme, framework } = project.config;
+  if (!theme) return;
+  const file = themeTogglePath(project);
+  if (framework === "sveltekit") {
+    project.addFile(file, svelteThemeToggle());
+  } else {
+    project.addFile(file, reactThemeToggle(project.useClient));
+    project.editFile(project.paths.css, (css) => `${css.trimEnd()}\n\n${THEME_TOGGLE_CSS}`);
+  }
+  project.addReadmeSection("Theme", themeReadme(theme, project.paths.css, file));
+}
+
+/** Where the theme switch lives; layouts import it from there. */
+export function themeTogglePath(project: ProjectBuilder): string {
+  return `${project.paths.components}/theme-toggle.${project.config.framework === "sveltekit" ? "svelte" : "tsx"}`;
+}
+
+/** Inline <script> for index.html / app.html: sets data-theme before the first paint. */
+export function themeScriptTag(indent: string): string {
+  const body = THEME_SCRIPT.split("\n")
+    .map((line) => `${indent}  ${line}`)
+    .join("\n");
+  return `\n${indent}<script>\n${body}\n${indent}</script>`;
 }

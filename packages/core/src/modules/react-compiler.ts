@@ -6,6 +6,7 @@ export const reactCompiler: StackModule = {
   description: "Automatic memoization of components and hooks at build time, no useMemo or useCallback needed.",
   category: "performance",
   homepage: "https://react.dev/learn/react-compiler",
+  frameworks: ["nextjs", "vite-react"],
   apply(project) {
     project.addDevDependency("babel-plugin-react-compiler");
     if (project.config.framework === "nextjs") {

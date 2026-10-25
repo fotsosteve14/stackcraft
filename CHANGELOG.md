@@ -7,11 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- Next.js 16.4.3 (StackCraft and generated projects, with `eslint-config-next` 16.4.3): fixes two unauthenticated remote code executions, in the Image Optimization API with SVG files ([GHSA-2464-fhr4-w9xw](https://github.com/advisories/GHSA-2464-fhr4-w9xw)) and in `use cache` functions returning typed arrays ([GHSA-673q-mjm6-r5xr](https://github.com/advisories/GHSA-673q-mjm6-r5xr)), and a denial of service with Server Actions ([GHSA-p3m5-59mp-jv5r](https://github.com/advisories/GHSA-p3m5-59mp-jv5r)). Projects generated with an earlier version should upgrade `next` to 16.4.3.
+
 ### Added
 
 - **Vite + React** framework, based on `create-vite` 9.2 (Vite 8, TypeScript 6, `@` alias). Simple, Feature-based and Clean architectures; examples render on the home page with React 19 `use()` and `Suspense`.
 - Modules adapt to the framework: Tailwind uses `@tailwindcss/vite`, React Compiler goes through `@rolldown/plugin-babel`, ESLint uses the create-vite rules (React Hooks, React Refresh), Docker serves the SPA with nginx, Zod validates `import.meta.env`, Three.js is lazy-loaded with `React.lazy`.
 - Server-only modules (Prisma, Drizzle, Auth.js, Better Auth) are limited to Next.js. The UI greys them out and removes them when switching framework.
+- **SvelteKit** framework (Svelte 5 runes, TypeScript, `$lib` alias), set up like `sv create`. Simple, Feature-based and Clean architectures with `+error.svelte` and a `/users` example route loaded in `+page.server.ts`; feature code lives under `src/lib`. Uses `adapter-auto`, or `adapter-node` when Docker is selected.
+- **bref-ui** module (SvelteKit only): Svelte 5 components with scoped CSS and theming. `<Theme />` is rendered in the root layout and the home page shows a `<Button />`; the README explains how to copy components into `src/lib/ui` with the bref-ui CLI.
+- **Svelte AI tools** module (SvelteKit only), in a new AI category: the same setup as `npx sv add ai-tools`. The official `AGENTS.md`/`GEMINI.md` prompt, the Svelte plugin for Claude Code (`.claude/settings.json`, with MCP server, skills and sub-agent) and OpenCode, and the remote Svelte MCP server for Cursor, VS Code and Gemini CLI.
+- SvelteKit support in Tailwind, ESLint (`eslint-plugin-svelte`), Prettier (`prettier-plugin-svelte`, also used to format the generated `.svelte` files), Vitest (`@testing-library/svelte`), Zod (validated `$env/dynamic/private` in `src/lib/server/env.ts`) and Docker (Node server image). React-only modules stay limited to Next.js and Vite + React.
+- **Theme**: custom colors for light and dark mode (primary, secondary, accent, background, foreground, muted, border, success, warning, error, info), for every framework.
+  - Start from a preset (Neutral, Orange from the Orange Design System / Boosted, Bref), type the colors, or import them from a design system: CSS variables (Bootstrap/Boosted, shadcn/ui…) or JSON tokens (W3C design tokens, Tokens Studio), in hex, rgb(), hsl() or oklch().
+  - The text color on each fill is picked for contrast, and the UI warns when body or muted text is below WCAG AA (4.5:1). A live preview shows both modes.
+  - Generated projects get CSS variables with shadcn/ui names (Tailwind utilities like `bg-primary` and the `dark:` variant follow them), a light / dark / system switch, and an inline script that applies the saved choice before the first paint. bref-ui receives the palette through `<Theme palette>`.
+  - `theme` parameter in the API and shareable links (preset id or encoded colors), `--theme` in the local `generate` script.
 - `fw` parameter in the API and shareable links.
 
 ## [0.2.0] - 2026-10-15

@@ -1,4 +1,5 @@
 import type { StackModule } from "../types";
+import { tailwindThemeColors, THEME_DARK_VARIANT, themeVariablesCss } from "../theme";
 import { tailwindFontTheme } from "./tailwind";
 
 export const shadcn: StackModule = {
@@ -7,6 +8,7 @@ export const shadcn: StackModule = {
   description: "Accessible components you copy into your project, built on Radix UI.",
   category: "ui",
   homepage: "https://ui.shadcn.com",
+  frameworks: ["nextjs", "vite-react"],
   requires: ["tailwind"],
   apply(project) {
     const { paths } = project;
@@ -114,7 +116,58 @@ export { Button, buttonVariants };
 `,
     );
 
-    project.addFile(
+    const { theme } = project.config;
+    if (theme) {
+      // The theme roles use shadcn/ui names; the remaining shadcn variables point at them.
+      project.addFile(
+        paths.css,
+        `@import "tailwindcss";
+@import "tw-animate-css";
+
+${THEME_DARK_VARIANT}
+
+@theme inline {
+${[
+  ...tailwindThemeColors(),
+  "--color-card: var(--card);",
+  "--color-card-foreground: var(--card-foreground);",
+  "--color-popover: var(--popover);",
+  "--color-popover-foreground: var(--popover-foreground);",
+  "--color-destructive: var(--destructive);",
+  "--color-input: var(--input);",
+  "--color-ring: var(--ring);",
+  "--radius-sm: calc(var(--radius) - 4px);",
+  "--radius-md: calc(var(--radius) - 2px);",
+  "--radius-lg: var(--radius);",
+  "--radius-xl: calc(var(--radius) + 4px);",
+]
+  .map((line) => `  ${line}`)
+  .join("\n")}
+${tailwindFontTheme(project)}}
+
+${themeVariablesCss(theme, [
+  "--radius: 0.625rem;",
+  "--card: var(--background);",
+  "--card-foreground: var(--foreground);",
+  "--popover: var(--background);",
+  "--popover-foreground: var(--foreground);",
+  "--destructive: var(--error);",
+  "--input: var(--border);",
+  "--ring: var(--primary);",
+])}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+`,
+      );
+    } else {
+      project.addFile(
       paths.css,
       `@import "tailwindcss";
 @import "tw-animate-css";
@@ -199,6 +252,7 @@ ${tailwindFontTheme(project)}  --color-card: var(--card);
 }
 `,
     );
+    }
 
     project.addReadmeSection(
       "UI components",

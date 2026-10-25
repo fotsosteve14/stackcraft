@@ -3,15 +3,59 @@ import type { StackModule } from "../types";
 export const vitest: StackModule = {
   id: "vitest",
   name: "Vitest",
-  description: "Fast unit testing with React Testing Library and jsdom.",
+  description: "Fast unit testing with Testing Library and jsdom.",
   category: "testing",
   homepage: "https://vitest.dev",
   apply(project) {
     const { config, paths } = project;
-    project
-      .addDevDependency("vitest", "jsdom", "@testing-library/react", "@testing-library/dom")
-      .addScript("test", "vitest");
+    project.addDevDependency("vitest", "jsdom").addScript("test", "vitest");
     const heading = `screen.getByRole("heading", { level: 1, name: ${JSON.stringify(config.name)} })`;
+
+    if (config.framework === "sveltekit") {
+      // svelteTesting() resolves Svelte's browser build in tests and unmounts components after each one.
+      const bref = project.has("bref-ui");
+      project
+        .addDevDependency("@testing-library/svelte")
+        .addVitePlugin('import { svelteTesting } from "@testing-library/svelte/vite";', "svelteTesting()")
+        .setViteConfig(
+          "test",
+          `{\n    environment: "jsdom",${bref ? '\n    setupFiles: ["./src/vitest-setup.ts"],' : ""}\n  }`,
+        );
+      if (bref) {
+        project.addFile(
+          "src/vitest-setup.ts",
+          `// jsdom does not implement matchMedia, which bref-ui reads to respect prefers-reduced-motion.
+if (typeof window.matchMedia !== "function") {
+  window.matchMedia = (query: string): MediaQueryList => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    addListener: () => {},
+    removeListener: () => {},
+    dispatchEvent: () => false,
+  });
+}
+`,
+        );
+      }
+      project.addFile(
+        `${paths.app}/page.test.ts`,
+        `import { render, screen } from "@testing-library/svelte";
+import { expect, test } from "vitest";
+import Page from "./+page.svelte";
+
+test("renders the project name", () => {
+  render(Page);
+  expect(${heading}).toBeDefined();
+});
+`,
+      );
+      return;
+    }
+
+    project.addDevDependency("@testing-library/react", "@testing-library/dom");
 
     if (config.framework === "nextjs") {
       project.addDevDependency("@vitejs/plugin-react");

@@ -6,6 +6,7 @@ export const three: StackModule = {
   description: "3D in the browser with React Three Fiber and Drei, plus an example scene.",
   category: "3d",
   homepage: "https://r3f.docs.pmnd.rs",
+  frameworks: ["nextjs", "vite-react"],
   apply(project) {
     const { paths } = project;
     const tw = project.has("tailwind");

@@ -6,6 +6,7 @@ export const zustand: StackModule = {
   description: "Small, fast client-side state management.",
   category: "state",
   homepage: "https://zustand.docs.pmnd.rs",
+  frameworks: ["nextjs", "vite-react"],
   apply(project) {
     project.addDependency("zustand");
 

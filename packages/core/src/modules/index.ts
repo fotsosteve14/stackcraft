@@ -1,6 +1,7 @@
 import type { ModuleCategory, StackModule } from "../types";
 import { animatedIcons } from "./animated-icons";
 import { betterAuth } from "./better-auth";
+import { brefUi } from "./bref-ui";
 import { docker } from "./docker";
 import { drizzle } from "./drizzle";
 import { eslint } from "./eslint";
@@ -10,6 +11,7 @@ import { prettier } from "./prettier";
 import { prisma } from "./prisma";
 import { reactCompiler } from "./react-compiler";
 import { shadcn } from "./shadcn";
+import { svelteAiTools } from "./svelte-ai-tools";
 import { three } from "./three";
 import { tailwind } from "./tailwind";
 import { vitest } from "./vitest";
@@ -24,6 +26,7 @@ import { zustand } from "./zustand";
 export const MODULES: readonly StackModule[] = [
   tailwind,
   shadcn,
+  brefUi,
   animatedIcons,
   motion,
   three,
@@ -38,6 +41,7 @@ export const MODULES: readonly StackModule[] = [
   prettier,
   vitest,
   docker,
+  svelteAiTools,
 ];
 
 export const CATEGORIES: readonly { id: ModuleCategory; label: string }[] = [
@@ -50,6 +54,7 @@ export const CATEGORIES: readonly { id: ModuleCategory; label: string }[] = [
   { id: "quality", label: "Code Quality" },
   { id: "testing", label: "Testing" },
   { id: "deployment", label: "Deployment" },
+  { id: "ai", label: "AI" },
 ];
 
 export function getModule(id: string): StackModule | undefined {
