@@ -46,7 +46,7 @@
   "devDependencies": {
     "@clack/prompts": "^1.8.1",
     "@stackcraft/core": "*",
-    "@types/node": "^24",
+    "@types/node": "^26",
     "esbuild": "^0.28.2",
     "typescript": "^5.9.3",
     "vitest": "^5.0.4"
