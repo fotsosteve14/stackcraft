@@ -145,6 +145,12 @@ test("animated icons register their shadcn registry and pin motion", async () =>
   expect(files["README.md"]).toContain("shadcn@latest add @icons-animated/tabler-heart");
 });
 
+test("heroicons adds the React package and documents its imports", async () => {
+  const { files } = await generateProject({ ...base, modules: ["heroicons"] });
+  expect(pkg(files).dependencies["@heroicons/react"]).toBe("^2.2.0");
+  expect(files["README.md"]).toContain('from "@heroicons/react/24/solid"');
+});
+
 describe("vite + react", () => {
   const vite: ProjectConfig = { ...base, framework: "vite-react" };
 

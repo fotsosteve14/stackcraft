@@ -5,6 +5,7 @@ import { brefUi } from "./bref-ui";
 import { docker } from "./docker";
 import { drizzle } from "./drizzle";
 import { eslint } from "./eslint";
+import { heroicons } from "./heroicons";
 import { motion } from "./motion";
 import { nextauth } from "./nextauth";
 import { prettier } from "./prettier";
@@ -28,6 +29,7 @@ export const MODULES: readonly StackModule[] = [
   shadcn,
   brefUi,
   animatedIcons,
+  heroicons,
   motion,
   three,
   prisma,

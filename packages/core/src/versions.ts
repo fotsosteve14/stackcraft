@@ -30,6 +30,7 @@ export const VERSIONS = {
   tailwindcss: "^4",
   "@tailwindcss/postcss": "^4",
   "@tailwindcss/vite": "^4",
+  "@heroicons/react": "^2.2.0",
   "class-variance-authority": "^0.7.1",
   clsx: "^2.1.1",
   "lucide-react": "^1.57.0",

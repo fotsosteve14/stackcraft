@@ -26,7 +26,7 @@ The CLI asks for your framework, dependencies and colors, installs everything an
 
 | Category | Modules |
 | --- | --- |
-| Styling & UI | Tailwind CSS v4, shadcn/ui, [bref-ui](https://github.com/feuersteiner/bref-ui), Animated Icons ([icons-animated](https://icons.lndev.me)), Motion |
+| Styling & UI | Tailwind CSS v4, shadcn/ui, [bref-ui](https://github.com/feuersteiner/bref-ui), Animated Icons ([icons-animated](https://icons.lndev.me)), Heroicons, Motion |
 | 3D | Three.js (React Three Fiber + Drei) |
 | Database | Prisma 7, Drizzle ORM |
 | Authentication | Auth.js (NextAuth v5), Better Auth |
