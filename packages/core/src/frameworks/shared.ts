@@ -31,6 +31,7 @@ export function finalizeCommon(project: ProjectBuilder, framework: Framework, mo
         scripts: project.scripts,
         dependencies: sortKeys(project.dependencies),
         devDependencies: sortKeys(project.devDependencies),
+        ...renderOverrides(project),
       },
       null,
       2,
@@ -49,9 +50,41 @@ export function finalizeCommon(project: ProjectBuilder, framework: Framework, mo
     project.addFile(".env.example", lines.join("\n").trimEnd());
   }
 
-  if (config.packageManager === "pnpm" && project.has("prisma")) {
-    // pnpm 10 skips dependency build scripts unless allowed.
-    project.addFile("pnpm-workspace.yaml", `onlyBuiltDependencies:\n  - "@prisma/engines"\n  - prisma\n`);
+  if (project.hasPnpmWorkspace) {
+    const lines: string[] = [];
+    if (project.has("prisma")) {
+      // pnpm 10 skips dependency build scripts unless allowed.
+      lines.push("onlyBuiltDependencies:", '  - "@prisma/engines"', "  - prisma");
+    }
+    const overrides = Object.entries(project.overrides);
+    if (overrides.length > 0) {
+      lines.push("overrides:", ...overrides.map(([path, version]) => `  ${JSON.stringify(path)}: ${JSON.stringify(version)}`));
+    }
+    project.addFile("pnpm-workspace.yaml", lines.join("\n"));
+  }
+}
+
+/** package.json field that forces transitive versions (pnpm reads them from pnpm-workspace.yaml). */
+function renderOverrides(project: ProjectBuilder): Record<string, unknown> {
+  const overrides = Object.entries(project.overrides);
+  if (overrides.length === 0) return {};
+  switch (project.config.packageManager) {
+    case "npm": {
+      // npm nests overrides: { parent: { pkg: version } }.
+      const npm: Record<string, string | Record<string, string>> = {};
+      for (const [path, version] of overrides) {
+        const [parent, name] = path.split(">") as [string, string?];
+        npm[parent] = name === undefined ? version : { ...(npm[parent] as Record<string, string>), [name]: version };
+      }
+      return { overrides: npm };
+    }
+    case "yarn":
+      return { resolutions: Object.fromEntries(overrides.map(([path, version]) => [`**/${path.replace(">", "/")}`, version])) };
+    case "bun":
+      // Bun only supports top-level overrides.
+      return { overrides: Object.fromEntries(overrides.filter(([path]) => !path.includes(">"))) };
+    case "pnpm":
+      return {};
   }
 }
 

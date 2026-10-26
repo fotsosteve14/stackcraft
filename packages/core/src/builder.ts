@@ -17,6 +17,11 @@ export class ProjectBuilder {
   readonly dependencies: Record<string, string> = {};
   readonly devDependencies: Record<string, string> = {};
   readonly scripts: Record<string, string> = {};
+  /**
+   * Versions forced for transitive dependencies, rendered for the chosen package manager.
+   * Keys use pnpm's syntax: "pkg" everywhere, or "parent>pkg" under one parent only.
+   */
+  readonly overrides: Record<string, string> = {};
   readonly env: EnvVar[] = [];
   readonly gitignore: string[] = [];
   /** next.config.ts entries: key → TypeScript expression. */
@@ -132,6 +137,16 @@ export class ProjectBuilder {
     return this;
   }
 
+  addOverride(path: string, version: string): this {
+    this.overrides[path] = version;
+    return this;
+  }
+
+  /** Whether the project needs a pnpm-workspace.yaml (pnpm settings and overrides live there). */
+  get hasPnpmWorkspace(): boolean {
+    return this.config.packageManager === "pnpm" && (this.has("prisma") || Object.keys(this.overrides).length > 0);
+  }
+
   addEnv(variable: EnvVar): this {
     if (!this.env.some((e) => e.key === variable.key)) this.env.push(variable);
     return this;
@@ -145,6 +160,16 @@ export class ProjectBuilder {
   setNextConfig(key: string, expression: string): this {
     this.nextConfig[key] = expression;
     return this;
+  }
+
+  unsetNextConfig(...keys: string[]): this {
+    for (const key of keys) delete this.nextConfig[key];
+    return this;
+  }
+
+  /** Next.js only: whether Cache Components ("use cache", cacheLife…) are enabled. */
+  get cacheComponents(): boolean {
+    return this.nextConfig.cacheComponents === "true";
   }
 
   wrapNextConfig(importLine: string, fn: string): this {

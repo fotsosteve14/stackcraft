@@ -161,6 +161,8 @@ describe("payload", () => {
     expect(files["src/app/layout.tsx"]).toBeUndefined();
     expect(files["src/app/(payload)/layout.tsx"]).toContain("RootLayout");
     expect(files["src/app/(payload)/admin/[[...segments]]/page.tsx"]).toContain("RootPage");
+    // Without Cache Components, the example feature does not use "use cache".
+    expect(files["src/features/users/queries.ts"]).not.toContain("use cache");
     expect(files["src/app/(payload)/api/[...slug]/route.ts"]).toContain("REST_GET");
     expect(files["src/payload.config.ts"]).toContain("postgresAdapter");
     expect(JSON.parse(files["tsconfig.json"]!).compilerOptions.paths["@payload-config"]).toEqual(["./src/payload.config.ts"]);
@@ -169,7 +171,8 @@ describe("payload", () => {
   test("wraps the Next.js config and declares its environment", async () => {
     const { files } = await generateProject({ ...base, modules: ["payload"] });
     expect(files["next.config.ts"]).toContain("export default withPayload(nextConfig);");
-    expect(files["next.config.ts"]).toContain("partialPrefetching: false");
+    expect(files["next.config.ts"]).not.toContain("cacheComponents");
+    expect(files["next.config.ts"]).not.toContain("partialPrefetching");
     expect(files["payload.config.ts"]).toContain('from "./collections/users"');
     expect(files[".env.example"]).toContain("PAYLOAD_SECRET");
     const deps = pkg(files).dependencies;
@@ -184,6 +187,26 @@ describe("payload", () => {
     expect(validateConfig({ ...base, framework: "vite-react", modules: ["payload"] })).toEqual([
       '"Payload CMS" is not available for Vite + React.',
     ]);
+  });
+
+  test("forces patched versions of vulnerable transitive dependencies for each package manager", async () => {
+    const npm = pkg((await generateProject({ ...base, modules: ["payload"] })).files);
+    expect(npm.overrides).toEqual({
+      dompurify: "^3.4.17",
+      "happy-dom": "^21.0.4",
+      "@esbuild-kit/core-utils": { esbuild: "^0.25.12" },
+    });
+
+    const pnpm = await generateProject({ ...base, packageManager: "pnpm", modules: ["payload", "docker"] });
+    expect(pkg(pnpm.files).overrides).toBeUndefined();
+    expect(pnpm.files["pnpm-workspace.yaml"]).toContain('"@esbuild-kit/core-utils>esbuild": "^0.25.12"');
+    expect(pnpm.files["Dockerfile"]).toContain("pnpm-workspace.yaml");
+
+    const yarn = pkg((await generateProject({ ...base, packageManager: "yarn", modules: ["payload"] })).files);
+    expect(yarn.resolutions["**/@esbuild-kit/core-utils/esbuild"]).toBe("^0.25.12");
+
+    const bun = pkg((await generateProject({ ...base, packageManager: "bun", modules: ["payload"] })).files);
+    expect(bun.overrides).toEqual({ dompurify: "^3.4.17", "happy-dom": "^21.0.4" });
   });
 
   test("docker starts PostgreSQL for it", async () => {

@@ -203,7 +203,7 @@ Rule of thumb: a feature may import from shared/ and server/, never from another
     const dbHint = project.has("prisma") || project.has("drizzle") ? ` (see ${project.importPath(project.paths.db)})` : "";
     project.addFile(
       `${root}/queries.ts`,
-      next
+      next && project.cacheComponents
         ? `import { cacheLife } from "next/cache";
 import type { User } from "./types";
 
@@ -219,7 +219,7 @@ export async function getUsers(): Promise<User[]> {
 `
         : `import type { User } from "./types";
 
-/** Data access for the users feature. Replace the in-memory list with ${svelte ? `your database${dbHint}` : "a call to your API"}. */
+/** Data access for the users feature. Replace the in-memory list with ${svelte || next ? `your database${dbHint}` : "a call to your API"}. */
 export async function getUsers(): Promise<User[]> {
   return ${USERS};
 }
@@ -444,14 +444,11 @@ export const useCases = {
     if (next) {
       project.addFile(
         `${project.paths.app}/users/page.tsx`,
-        `import { cacheLife } from "next/cache";
-import { UserList } from "@/components/user-list";
+        `${project.cacheComponents ? `import { cacheLife } from "next/cache";\n` : ""}import { UserList } from "@/components/user-list";
 import { useCases } from "@/infrastructure/container";
 
 export default async function UsersPage() {
-  "use cache";
-  cacheLife("hours");
-  const users = await useCases.listUsers();
+${project.cacheComponents ? `  "use cache";\n  cacheLife("hours");\n` : ""}  const users = await useCases.listUsers();
   return ${usersPageBody(ctx)};
 }
 `,

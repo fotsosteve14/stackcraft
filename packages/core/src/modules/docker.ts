@@ -123,7 +123,7 @@ EXPOSE 80
     }
 
     project.setNextConfig("output", '"standalone"');
-    const extraPmFiles = project.config.packageManager === "pnpm" && project.has("prisma") ? " pnpm-workspace.yaml" : "";
+    const extraPmFiles = project.hasPnpmWorkspace ? " pnpm-workspace.yaml" : "";
     // Prisma generates its client on postinstall, so the schema must be there before installing.
     const prismaFiles = project.has("prisma") ? "COPY prisma ./prisma\nCOPY prisma.config.ts ./\n" : "";
 

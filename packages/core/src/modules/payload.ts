@@ -45,6 +45,10 @@ export const payload: StackModule = {
         "sharp",
       )
       .addScript("payload", "payload")
+      // Payload 3.92 ships vulnerable versions of these: force the patched ones.
+      .addOverride("dompurify", "^3.4.17")
+      .addOverride("happy-dom", "^21.0.4")
+      .addOverride("@esbuild-kit/core-utils>esbuild", "^0.25.12")
       .addScript("generate:types", "payload generate:types")
       .addScript("generate:importmap", "payload generate:importmap")
       .addEnv({
@@ -54,8 +58,9 @@ export const payload: StackModule = {
       })
       .addEnv({ key: "PAYLOAD_SECRET", value: "", comment: "Generate one with: openssl rand -hex 32" })
       .wrapNextConfig('import { withPayload } from "@payloadcms/next/withPayload";', "withPayload")
-      // The admin page reads params in generateMetadata(), which Partial Prefetching reports as an error.
-      .setNextConfig("partialPrefetching", "false")
+      // Payload's admin panel reads the current time and request data while rendering, which
+      // Cache Components reports as errors on every admin page: keep the classic caching model.
+      .unsetNextConfig("cacheComponents", "partialPrefetching")
       // Uploads are served by Payload's REST API.
       .setNextConfig("images", '{ localPatterns: [{ pathname: "/api/media/file/**" }] }');
 
