@@ -21,13 +21,18 @@ export class ProjectBuilder {
   readonly gitignore: string[] = [];
   /** next.config.ts entries: key → TypeScript expression. */
   readonly nextConfig: Record<string, string> = {};
+  /** next.config.ts plugins: the exported config is wrapped in each call, in order. */
+  readonly nextConfigWrappers: { importLine: string; fn: string }[] = [];
   /** vite.config.ts: import lines, plugin calls and extra top-level entries (key → expression). */
   readonly vite = { imports: [] as string[], plugins: [] as string[], config: {} as Record<string, string> };
   /** Vite only: components rendered on the home page (SPAs have no file-based routes). */
   readonly homeSections: { importLine: string; element: string }[] = [];
   readonly readmeSections: ReadmeSection[] = [];
   /** Where each kind of file goes, according to the chosen architecture. */
-  readonly paths: ProjectPaths;
+  readonly paths: ProjectPaths & {
+    /** App Router root. Same as `app`, except with Payload, whose admin panel needs its own root layout. */
+    appRoot: string;
+  };
 
   constructor(
     readonly config: ProjectConfig,
@@ -35,7 +40,14 @@ export class ProjectBuilder {
   ) {
     const architecture = getArchitecture(config.architecture);
     if (!architecture) throw new Error(`Unknown architecture "${config.architecture}"`);
-    this.paths = architecture.paths[config.framework];
+    const paths = architecture.paths[config.framework];
+    if (config.framework === "nextjs" && moduleIds.has("payload")) {
+      // Like Payload's templates: the site in app/(frontend), the admin panel in app/(payload).
+      const app = `${paths.app}/(frontend)`;
+      this.paths = { ...paths, appRoot: paths.app, app, css: paths.css.replace(paths.app, app) };
+    } else {
+      this.paths = { ...paths, appRoot: paths.app };
+    }
   }
 
   /** '"use client";' + blank line for Next.js Client Components, nothing for client-only frameworks. */
@@ -132,6 +144,11 @@ export class ProjectBuilder {
 
   setNextConfig(key: string, expression: string): this {
     this.nextConfig[key] = expression;
+    return this;
+  }
+
+  wrapNextConfig(importLine: string, fn: string): this {
+    this.nextConfigWrappers.push({ importLine, fn });
     return this;
   }
 

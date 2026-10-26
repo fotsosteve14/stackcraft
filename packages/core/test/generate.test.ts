@@ -131,7 +131,8 @@ describe("generateProject", () => {
   test("every module generates without errors alongside the others", async () => {
     const all = MODULES.filter((m) => supportsFramework(m, "nextjs"))
       .map((m) => m.id)
-      .filter((id) => id !== "drizzle" && id !== "better-auth");
+      // Payload conflicts with Prisma and moves the site into app/(frontend): tested on its own.
+      .filter((id) => id !== "drizzle" && id !== "better-auth" && id !== "payload");
     const { modules } = await generateProject({ ...base, modules: all });
     expect(modules).toHaveLength(all.length);
   });
@@ -149,6 +150,46 @@ test("heroicons adds the React package and documents its imports", async () => {
   const { files } = await generateProject({ ...base, modules: ["heroicons"] });
   expect(pkg(files).dependencies["@heroicons/react"]).toBe("^2.2.0");
   expect(files["README.md"]).toContain('from "@heroicons/react/24/solid"');
+});
+
+describe("payload", () => {
+  test("moves the site into (frontend) and adds the admin panel next to it", async () => {
+    const { files } = await generateProject({ ...base, architecture: "feature", modules: ["payload"] });
+    expect(files["src/app/(frontend)/layout.tsx"]).toContain('import "./globals.css"');
+    expect(files["src/app/(frontend)/globals.css"]).toBeDefined();
+    expect(files["src/app/(frontend)/users/page.tsx"]).toBeDefined();
+    expect(files["src/app/layout.tsx"]).toBeUndefined();
+    expect(files["src/app/(payload)/layout.tsx"]).toContain("RootLayout");
+    expect(files["src/app/(payload)/admin/[[...segments]]/page.tsx"]).toContain("RootPage");
+    expect(files["src/app/(payload)/api/[...slug]/route.ts"]).toContain("REST_GET");
+    expect(files["src/payload.config.ts"]).toContain("postgresAdapter");
+    expect(JSON.parse(files["tsconfig.json"]!).compilerOptions.paths["@payload-config"]).toEqual(["./src/payload.config.ts"]);
+  });
+
+  test("wraps the Next.js config and declares its environment", async () => {
+    const { files } = await generateProject({ ...base, modules: ["payload"] });
+    expect(files["next.config.ts"]).toContain("export default withPayload(nextConfig);");
+    expect(files["next.config.ts"]).toContain("partialPrefetching: false");
+    expect(files["payload.config.ts"]).toContain('from "./collections/users"');
+    expect(files[".env.example"]).toContain("PAYLOAD_SECRET");
+    const deps = pkg(files).dependencies;
+    expect(deps.payload).toBe(deps["@payloadcms/next"]);
+    expect(deps.graphql).toMatch(/^\^16\./);
+  });
+
+  test("conflicts with the ORMs and is Next.js only", () => {
+    expect(validateConfig({ ...base, modules: ["payload", "prisma"] })).toEqual([
+      '"Payload CMS" cannot be used together with "Prisma".',
+    ]);
+    expect(validateConfig({ ...base, framework: "vite-react", modules: ["payload"] })).toEqual([
+      '"Payload CMS" is not available for Vite + React.',
+    ]);
+  });
+
+  test("docker starts PostgreSQL for it", async () => {
+    const { files } = await generateProject({ ...base, modules: ["payload", "docker"] });
+    expect(files["docker-compose.yml"]).toContain("postgres");
+  });
 });
 
 describe("vite + react", () => {
@@ -367,7 +408,8 @@ test("react compiler enables reactCompiler in next.config", async () => {
 describe("architectures", () => {
   const all = MODULES.filter((m) => supportsFramework(m, "nextjs"))
     .map((m) => m.id)
-    .filter((id) => id !== "drizzle" && id !== "better-auth");
+    // Payload conflicts with Prisma and moves the site into app/(frontend): tested on its own.
+    .filter((id) => id !== "drizzle" && id !== "better-auth" && id !== "payload");
 
   test("rejects unknown architectures", () => {
     expect(validateConfig({ ...base, architecture: "mvc" as never })).toEqual(['Unknown architecture "mvc".']);

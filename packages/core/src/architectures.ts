@@ -257,7 +257,7 @@ export type CreateUserInput = z.infer<typeof createUserSchema>;
 
     if (next) {
       project.addFile(
-        "src/app/users/page.tsx",
+        `${project.paths.app}/users/page.tsx`,
         `import { UserList } from "@/features/users/components/user-list";
 import { getUsers } from "@/features/users/queries";
 
@@ -443,7 +443,7 @@ export const useCases = {
 
     if (next) {
       project.addFile(
-        "src/app/users/page.tsx",
+        `${project.paths.app}/users/page.tsx`,
         `import { cacheLife } from "next/cache";
 import { UserList } from "@/components/user-list";
 import { useCases } from "@/infrastructure/container";

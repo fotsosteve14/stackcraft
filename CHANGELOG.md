@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Payload CMS** module for Next.js, in a new CMS category: the admin panel at `/admin`, PostgreSQL, `Users` and `Media` collections, and the REST and GraphQL APIs. As in Payload's templates, the site moves to `app/(frontend)` and the admin panel lives in `app/(payload)`, each with its own root layout. Partial Prefetching is turned off in these projects, because Payload's admin page reads `params` in `generateMetadata()`. Payload conflicts with Prisma and Drizzle, since it manages the database schema.
+
 ## [0.6.0] - 2026-10-26
 
 Heroicons for Next.js and Vite + React projects.

@@ -15,7 +15,7 @@ export interface VercelDeployment {
 /** What deploying the project on Vercel requires, from its config. */
 export function vercelDeployment(config: ProjectConfig): VercelDeployment {
   const { project, modules } = buildProject(config);
-  const needsDatabase = modules.includes("prisma") || modules.includes("drizzle");
+  const needsDatabase = ["prisma", "drizzle", "payload"].some((id) => modules.includes(id));
   // svelte.config.js switches to adapter-node when Docker is selected, which Vercel cannot run.
   const reason =
     config.framework === "sveltekit" && modules.includes("docker")

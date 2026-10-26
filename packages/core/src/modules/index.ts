@@ -8,6 +8,7 @@ import { eslint } from "./eslint";
 import { heroicons } from "./heroicons";
 import { motion } from "./motion";
 import { nextauth } from "./nextauth";
+import { payload } from "./payload";
 import { prettier } from "./prettier";
 import { prisma } from "./prisma";
 import { reactCompiler } from "./react-compiler";
@@ -34,6 +35,7 @@ export const MODULES: readonly StackModule[] = [
   three,
   prisma,
   drizzle,
+  payload,
   nextauth,
   betterAuth,
   zustand,
@@ -50,6 +52,7 @@ export const CATEGORIES: readonly { id: ModuleCategory; label: string }[] = [
   { id: "ui", label: "Styling & UI" },
   { id: "database", label: "Database" },
   { id: "auth", label: "Authentication" },
+  { id: "cms", label: "CMS" },
   { id: "state", label: "State & Validation" },
   { id: "performance", label: "Performance" },
   { id: "3d", label: "3D" },

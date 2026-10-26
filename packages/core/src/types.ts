@@ -26,6 +26,7 @@ export type ModuleCategory =
   | "ui"
   | "database"
   | "auth"
+  | "cms"
   | "state"
   | "performance"
   | "3d"

@@ -116,13 +116,16 @@ function renderNextConfig(project: ProjectBuilder): string {
     entries.length === 0
       ? "  /* config options here */"
       : entries.map(([key, value]) => `  ${key}: ${value},`).join("\n");
-  return `import type { NextConfig } from "next";
+  const imports = project.nextConfigWrappers.map((w) => `${w.importLine}
+`).join("");
+  const exported = project.nextConfigWrappers.reduce((expression, w) => `${w.fn}(${expression})`, "nextConfig");
+  return `${imports}import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
 ${body}
 };
 
-export default nextConfig;
+export default ${exported};
 `;
 }
 

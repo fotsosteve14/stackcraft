@@ -173,7 +173,7 @@ CMD ["node", "server.js"]
       ["node_modules", ".next", ".git", "Dockerfile", ".dockerignore", ".env*", "!.env.example", "coverage"].join("\n"),
     );
 
-    const usesPostgres = project.has("prisma") || project.has("drizzle");
+    const usesPostgres = project.has("prisma") || project.has("drizzle") || project.has("payload");
     if (usesPostgres) project.addFile("docker-compose.yml", composeFile());
 
     project.addReadmeSection("Docker", dockerReadme(project, usesPostgres, pm.lockfile));

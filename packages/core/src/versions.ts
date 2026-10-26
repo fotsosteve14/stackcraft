@@ -55,6 +55,16 @@ export const VERSIONS = {
   postgres: "^3.4.9",
   dotenv: "^18.0.7",
 
+  // CMS: every @payloadcms package must have the same version as payload.
+  payload: "3.92.0",
+  "@payloadcms/next": "3.92.0",
+  "@payloadcms/ui": "3.92.0",
+  "@payloadcms/db-postgres": "3.92.0",
+  "@payloadcms/richtext-lexical": "3.92.0",
+  // Payload's peer dependency (GraphQL 17 is not supported yet).
+  graphql: "^16.14.2",
+  sharp: "^0.35.5",
+
   // Auth
   "next-auth": "5.0.0-beta.32",
   "better-auth": "^1.7.8",

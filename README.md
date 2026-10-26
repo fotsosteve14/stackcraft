@@ -30,6 +30,7 @@ The CLI asks for your framework, dependencies and colors, installs everything an
 | 3D | Three.js (React Three Fiber + Drei) |
 | Database | Prisma 7, Drizzle ORM |
 | Authentication | Auth.js (NextAuth v5), Better Auth |
+| CMS | [Payload](https://payloadcms.com) (admin panel and PostgreSQL) |
 | State & Validation | Zustand, Zod |
 | Performance | React Compiler |
 | Code Quality | ESLint, Prettier |
