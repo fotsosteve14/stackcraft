@@ -1,6 +1,6 @@
 {
   "name": "@stackcraft/core",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "StackCraft generation engine: turns a project config and a list of modules into project files.",
   "license": "MIT",
   "type": "module",

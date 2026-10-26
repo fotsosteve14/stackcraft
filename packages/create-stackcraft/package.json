@@ -1,6 +1,6 @@
 {
   "name": "@stackcraft-app/create",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Create a ready-to-code Next.js, Vite + React or SvelteKit project with the dependencies you pick.",
   "license": "MIT",
   "author": "steve_joel",

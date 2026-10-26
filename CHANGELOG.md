@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-26
+
+Payload CMS for Next.js projects.
+
 ### Added
 
 - **Payload CMS** module for Next.js, in a new CMS category: the admin panel at `/admin`, PostgreSQL, `Users` and `Media` collections, and the REST and GraphQL APIs. As in Payload's templates, the site moves to `app/(frontend)` and the admin panel lives in `app/(payload)`, each with its own root layout. Cache Components and Partial Prefetching are turned off in these projects: Payload's admin panel reads the current time and request data while rendering, which Cache Components reports as errors on every admin page. The example `users` feature then skips `"use cache"`. Payload 3.92 depends on vulnerable versions of `dompurify`, `happy-dom` and `esbuild`: the generated project forces the patched ones (`overrides`, `resolutions` or `pnpm-workspace.yaml`). Payload conflicts with Prisma and Drizzle, since it manages the database schema.
@@ -111,7 +115,8 @@ First public version.
 - Generated files are formatted with Prettier.
 - CI workflow, contributing guide and issue templates.
 
-[Unreleased]: https://github.com/fotsosteve14/stackcraft/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/fotsosteve14/stackcraft/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.3.0...v0.4.0
