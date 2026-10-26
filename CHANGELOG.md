@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-26
+
+Heroicons for Next.js and Vite + React projects.
+
+### Added
+
+- **Heroicons** module for Next.js and Vite + React: adds `@heroicons/react` and documents how to import the outline and solid icons.
+
 ## [0.5.0] - 2026-10-25
 
 Deploy to Vercel from the CLI and the web UI. First release published to npm from GitHub Actions.
@@ -99,7 +107,8 @@ First public version.
 - Generated files are formatted with Prettier.
 - CI workflow, contributing guide and issue templates.
 
-[Unreleased]: https://github.com/fotsosteve14/stackcraft/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/fotsosteve14/stackcraft/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/fotsosteve14/stackcraft/compare/v0.2.0...v0.3.0
