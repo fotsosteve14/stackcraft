@@ -39,7 +39,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "prettier": "^3.9.10",
+    "prettier": "^3.10.1",
     "prettier-plugin-svelte": "^4.1.1",
     "svelte": "^5.57.2"
   },
